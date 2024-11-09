@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Game</title>
+    <meta name="description" content="A basic HTML5 game">
+    <meta name="author" content="[Your name]">
+    <style>
+        #canvas {
+            border: 1px solid lightgrey;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="750" height="400"></canvas>
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+        let rectX = 0;
+        let rectY = 0;
+        let secondsPassed = 0.001;
+        let oldTimeStamp = 0;
+        let movingSpeed = 50;   
+
+        function init() {
+            // Get a reference to the canvas and context
+            canvas = document.getElementById('canvas');
+            context = canvas.getContext('2d');
+
+            // Start the game loop
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timeStamp) {
+            // Update game objects in the loop
+            update(secondsPassed);
+            draw();
+        
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            rectX += 1;
+            rectY += 1;
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#ff8080';
+            context.fillRect(rectX, rectY, 150, 100);
+        }
+        function update(secondsPassed) {
+    // Use time to calculate new position
+            rectX += (movingSpeed * secondsPassed);
+            rectY += (movingSpeed * secondsPassed);
+        }
+
+        // Initialize the game when the window loads
+        window.onload = init;
+    </script>
+</body>
+</html>

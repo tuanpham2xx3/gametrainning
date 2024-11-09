@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Game</title>
+    <meta name="description" content="A basic HTML5 game">
+    <meta name="author" content="[Your name]">
+    <style>
+        #canvas {
+            border: 1px solid lightgrey;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="750" height="400"></canvas>
+    <script>
+        "use strict";
+        let position = { x: 100, y: 100 }; // Starting position
+        let velocity = { x: 2, y: 3 };     // Speed and direction of movement
+        const canvas = document.getElementById('canvas'); // Khai báo biến canvas
+        const context = canvas.getContext('2d'); // Khai báo biến context
+        velocity = multiplyVector(velocity, 0.1); // Doubling speed
+        velocity = normalize(velocity); // Set to unit vector
+        setDirection(1, 1, 2);
+    
+        function drawCircle(position) {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            context.beginPath();
+            context.arc(position.x, position.y, 20, 0, Math.PI * 2); // Draw circle
+            context.fillStyle = "blue";
+            context.fill();
+            context.closePath();
+        }
+    
+        function updatePosition() {
+            position = addVectors(position, velocity);
+        }
+    
+        function gameLoop() {
+            updatePosition();
+            drawCircle(position);
+            requestAnimationFrame(gameLoop); // Call gameLoop on the next frame
+        }
+    
+        // Định nghĩa hàm multiplyVector
+        function multiplyVector(vector, scalar) {
+            return { x: vector.x * scalar, y: vector.y * scalar };
+        }
+    
+        // Định nghĩa hàm addVectors
+        function addVectors(v1, v2) {
+            return { x: v1.x + v2.x, y: v1.y + v2.y };
+        }
+        
+        function normalize(vector) {
+        const length = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+        if (length === 0) return { x: 0, y: 0 }; // Tránh chia cho 0
+        return { x: vector.x / length, y: vector.y / length }; // Trả về vector đơn vị
+        }
+
+        function setDirection(x, y, speed) {
+        let newDirection = normalize({ x: x, y: y });
+        velocity = multiplyVector(newDirection, speed);
+        }
+        gameLoop(); // Start the animation
+    </script>
+    </script>
+</body>
+</html>

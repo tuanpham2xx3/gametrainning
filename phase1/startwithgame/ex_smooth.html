@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Game</title>
+    <meta name="description" content="A basic HTML5 game">
+    <meta name="author" content="[Your name]">
+    <style>
+        #canvas {
+            border: 1px solid lightgrey;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="750" height="400"></canvas>
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+        let userRect = { x: 375, y: 200, speed: 200 }; // User-controlled rectangle
+        let rect1 = { x: 375, y: 200, radius: 100, angle: 0, speed: 1 }; // First rectangle
+        let rect2 = { x: 375, y: 200, radius: 100, angle: Math.PI, speed: 1 }; // Second rectangle
+        let lastFrameTime = 0;
+        const frameTimes = [];
+        const maxFrameTimes = 60; // Store the last 60 frame times
+
+        function init() {
+            canvas = document.getElementById('canvas');
+            context = canvas.getContext('2d');
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timeStamp) {
+            const elapsed = (timeStamp - lastFrameTime) / 1000; // Convert to seconds
+            lastFrameTime = timeStamp;
+
+            update(elapsed);
+            draw();
+            calculateFPS(elapsed);
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function update(secondsPassed) {
+            // User-controlled rectangle movement
+            if (keys['ArrowUp']) userRect.y -= userRect.speed * secondsPassed;
+            if (keys['ArrowDown']) userRect.y += userRect.speed * secondsPassed;
+            if (keys['ArrowLeft']) userRect.x -= userRect.speed * secondsPassed;
+            if (keys['ArrowRight']) userRect.x += userRect.speed * secondsPassed;
+
+            // Update positions for circular motion
+            rect1.angle += rect1.speed * secondsPassed;
+            rect1.x = 375 + rect1.radius * Math.cos(rect1.angle);
+            rect1.y = 200 + rect1.radius * Math.sin(rect1.angle);
+
+            rect2.angle -= rect2.speed * secondsPassed; // Move in the opposite direction
+            rect2.x = 375 + rect2.radius * Math.cos(rect2.angle);
+            rect2.y = 200 + rect2.radius * Math.sin(rect2.angle);
+
+            // Bounce effect when reaching edges
+            if (rect1.x < 0 || rect1.x > canvas.width) {
+                rect1.speed = -rect1.speed;
+            }
+            if (rect2.x < 0 || rect2.x > canvas.width) {
+                rect2.speed = -rect2.speed;
+            }
+
+            // Keep user rectangle within canvas bounds
+            userRect.x = Math.max(0, Math.min(canvas.width - 50, userRect.x));
+            userRect.y = Math.max(0, Math.min(canvas.height - 50, userRect.y));
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#ff8080';
+            context.fillRect(rect1.x - 25, rect1.y - 25, 50, 50); // Draw first rectangle
+            context.fillStyle = '#80ff80';
+            context.fillRect(rect2.x - 25, rect2.y - 25, 50, 50); // Draw second rectangle
+            context.fillStyle = '#8080ff';
+            context.fillRect(userRect.x, userRect.y, 50, 50); // Draw user-controlled rectangle
+        }
+
+        function calculateFPS(secondsPassed) {
+            frameTimes.push(secondsPassed);
+            if (frameTimes.length > maxFrameTimes) {
+                frameTimes.shift(); // Keep only the last 60 frame times
+            }
+            const averageFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+            const fps = Math.round(1 / averageFrameTime);
+            context.fillStyle = 'black';
+            context.font = '20px Arial';
+            context.fillText("FPS: " + fps, 10, 20);
+        }
+
+        // Key handling
+        const keys = {};
+        document.addEventListener('keydown', (event) => {
+            keys[event.key] = true;
+        });
+        document.addEventListener('keyup', (event) => {
+            keys[event.key] = false;
+        });
+
+        // Initialize the game when the window loads
+        window.onload = init;
+    </script>
+</body>
+</html>

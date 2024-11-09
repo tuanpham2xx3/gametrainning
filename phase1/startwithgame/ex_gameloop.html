@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Game</title>
+    <meta name="description" content="A basic HTML5 game">
+    <meta name="author" content="[Your name]">
+    <style>
+        #canvas {
+            border: 1px solid lightgrey;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 5px; 
+            margin-left: 50px; 
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="750" height="400"></canvas>
+    <button id="but30">30FPS</button>
+    <button id="butunli">UNLIMITED FPS</button>
+
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+        let lastFrameTime = 0;
+        let frameInterval = 1000 / 30; 
+        let unlimitedFPS = false;
+
+        // Ball object
+        const ball = {
+            x: 100,
+            y: 100,
+            radius: 20,
+            speedX: 5,
+            speedY: 3,
+            color: '#ff8080',
+            draw: function() {
+                context.fillStyle = this.color;
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fill();
+            },
+            update: function() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Bounce off the walls
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.speedX = -this.speedX; 
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.speedY = -this.speedY;
+                }
+            }
+        };
+
+        
+        const frameTimes = [];
+        const maxFrameTimes = 30;
+        let totalFrameTime = 0;
+
+        window.onload = init;
+
+        function init() {
+            // Get a reference to the canvas
+            canvas = document.getElementById('canvas');
+            context = canvas.getContext('2d');
+
+            document.getElementById('but30').addEventListener('click', function() {
+                unlimitedFPS = false; 
+                frameInterval = 1000 / 30; // Cập nhật frameInterval cho 30 FPS
+                console.log("FPS limited to 30");
+            });
+            document.getElementById('butunli').addEventListener('click', function() {
+                unlimitedFPS = true; 
+                console.log("FPS unlimited");
+            });
+
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timeStamp) {
+            const elapsed = timeStamp - lastFrameTime;
+
+            
+            if (!unlimitedFPS && elapsed >= frameInterval) {
+                lastFrameTime = timeStamp; 
+                updateAndDraw();
+            } else if (unlimitedFPS) {
+                updateAndDraw();
+                lastFrameTime = timeStamp; 
+            }
+
+            
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function updateAndDraw() {
+            
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            ball.update();
+            ball.draw();
+           
+            const currentTime = performance.now();
+            const secondsPassed = (currentTime - lastFrameTime) / 1000; 
+
+            
+            frameTimes.push(secondsPassed);
+            totalFrameTime += secondsPassed;
+
+            
+            if (frameTimes.length > maxFrameTimes) {
+                totalFrameTime -= frameTimes.shift(); 
+            }
+
+            
+            const averageFPS = Math.round(1 / (totalFrameTime / frameTimes.length));
+
+           
+            context.fillStyle = 'black';
+            context.font = '25px Arial';
+            context.fillText("Average FPS: " + averageFPS, 10, 30);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision Detection: Fixed Size Shapes</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #gameCanvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="750" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+
+        const objects = [];
+
+        const RECT_WIDTH = 50;
+        const RECT_HEIGHT = 30;
+        const CIRCLE_RADIUS = 20;
+
+        function createRandomRectangle() {
+            const x = Math.random() * (canvas.width - RECT_WIDTH);
+            const y = Math.random() * (canvas.height - RECT_HEIGHT);
+            const vx = (Math.random() - 0.5) * 4;
+            const vy = (Math.random() - 0.5) * 4;
+            return { x, y, width: RECT_WIDTH, height: RECT_HEIGHT, vx, vy, type: 'rectangle', color: '#0099b0', isColliding: false };
+        }
+
+        function createRandomCircle() {
+            const x = Math.random() * (canvas.width - CIRCLE_RADIUS * 2) + CIRCLE_RADIUS;
+            const y = Math.random() * (canvas.height - CIRCLE_RADIUS * 2) + CIRCLE_RADIUS;
+            const vx = (Math.random() - 0.5) * 4;
+            const vy = (Math.random() - 0.5) * 4;
+            return { x, y, radius: CIRCLE_RADIUS, vx, vy, type: 'circle', color: '#0099b0', isColliding: false };
+        }
+
+        for (let i = 0; i < 10; i++) {
+            if (Math.random() < 0.5) {
+                objects.push(createRandomRectangle());
+            } else {
+                objects.push(createRandomCircle());
+            }
+        }
+
+        function rectCircleIntersect(rect, circle) {
+            let closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
+            let closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
+
+            let distanceX = circle.x - closestX;
+            let distanceY = circle.y - closestY;
+
+            let distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+            if (distanceSquared < (circle.radius * circle.radius)) {
+                return {
+                    collision: true,
+                    point: { x: closestX, y: closestY },
+                    normal: { x: distanceX, y: distanceY }
+                };
+            }
+            return { collision: false };
+        }
+
+        function rectRectIntersect(rect1, rect2) {
+            return !(rect1.x > rect2.x + rect2.width ||
+                     rect1.x + rect1.width < rect2.x ||
+                     rect1.y > rect2.y + rect2.height ||
+                     rect1.y + rect1.height < rect2.y);
+        }
+
+        function circleCircleIntersect(circle1, circle2) {
+            const distanceX = circle1.x - circle2.x;
+            const distanceY = circle1.y - circle2.y;
+            const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+            const radiusSum = circle1.radius + circle2.radius;
+            return distanceSquared < (radiusSum * radiusSum);
+        }
+
+        function drawRectangle(rect) {
+            context.fillStyle = rect.color;
+            context.fillRect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        function drawCircle(circle) {
+            context.beginPath();
+            context.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+            context.fillStyle = circle.color;
+            context.fill();
+        }
+
+        function updateCanvas() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let obj of objects) {
+                if (obj.type === 'rectangle') {
+                    obj.x += obj.vx;
+                    obj.y += obj.vy;
+                    drawRectangle(obj);
+                } else if (obj.type === 'circle') {
+                    obj.x += obj.vx;
+                    obj.y += obj.vy;
+                    drawCircle(obj);
+                }
+
+                for (let other of objects) {
+                    if (obj !== other) {
+                        let collisionDetected = false;
+
+                        if (obj.type === 'rectangle' && other.type === 'circle') {
+                            collisionDetected = rectCircleIntersect(obj, other).collision;
+                        } else if (obj.type === 'rectangle' && other.type === 'rectangle') {
+                            collisionDetected = rectRectIntersect(obj, other);
+                        } else if (obj.type === 'circle' && other.type === 'circle') {
+                            collisionDetected = circleCircleIntersect(obj, other);
+                        }
+
+                        if (collisionDetected) {
+                            obj.color = '#ff8080';
+                            other.color = '#ff8080';
+                            obj.isColliding = true;
+                            other.isColliding = true;
+
+                            obj.vx *= -1;
+                            obj.vy *= -1;
+                            other.vx *= -1;
+                            other.vy *= -1;
+
+                            console.log("Collision detected!");
+                        }
+                    }
+                }
+
+                if (obj.type === 'rectangle') {
+                    if (obj.x < 0 || obj.x + obj.width > canvas.width) {
+                        obj.vx *= -1;
+                    }
+                    if (obj.y < 0 || obj.y + obj.height > canvas.height) {
+                        obj.vy *= -1;
+                    }
+                } else if (obj.type === 'circle') {
+                    if (obj.x - obj.radius < 0 || obj.x + obj.radius > canvas.width) {
+                        obj.vx *= -1;
+                    }
+                    if (obj.y - obj.radius < 0 || obj.y + obj.radius > canvas.height) {
+                        obj.vy *= -1;
+                    }
+                }
+            }
+
+            for (let obj of objects) {
+                if (!obj.isColliding) {
+                    obj.color = '#0099b0';
+                }
+                obj.isColliding = false;
+            }
+
+            requestAnimationFrame(updateCanvas);
+        }
+
+        updateCanvas();
+    </script>
+</body>
+</html>

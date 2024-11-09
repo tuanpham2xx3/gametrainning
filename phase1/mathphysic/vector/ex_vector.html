@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5 Game</title>
+    <meta name="description" content="A basic HTML5 game">
+    <meta name="author" content="[Your name]">
+    <style>
+        #canvas {
+            border: 1px solid lightgrey;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas" width="750" height="400"></canvas>
+    <script>
+        "use strict";
+
+        class Vector {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            add(vector) {
+                return new Vector(this.x + vector.x, this.y + vector.y);
+            }
+
+            multiply(scalar) {
+                return new Vector(this.x * scalar, this.y * scalar);
+            }
+
+            normalize() {
+                const length = Math.sqrt(this.x * this.x + this.y * this.y);
+                if (length === 0) return new Vector(0, 0);
+                return new Vector(this.x / length, this.y / length);
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        const circles = [];
+        const numCircles = 5;
+
+        // Initialize circles with random positions and velocities
+        for (let i = 0; i < numCircles; i++) {
+            const position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+            const velocity = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1).multiply(2); // Random velocity
+            circles.push({ position, velocity });
+        }
+
+        function drawCircle(circle) {
+            context.beginPath();
+            context.arc(circle.position.x, circle.position.y, 20, 0, Math.PI * 2);
+            context.fillStyle = "blue";
+            context.fill();
+            context.closePath();
+        }
+
+        function updatePositions() {
+            circles.forEach(circle => {
+                circle.position = circle.position.add(circle.velocity);
+                // Bounce off walls
+                if (circle.position.x < 0 || circle.position.x > canvas.width) {
+                    circle.velocity.x *= -1;
+                }
+                if (circle.position.y < 0 || circle.position.y > canvas.height) {
+                    circle.velocity.y *= -1;
+                }
+            });
+        }
+
+        function gameLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+            updatePositions();
+            circles.forEach(drawCircle);
+            requestAnimationFrame(gameLoop); // Call gameLoop on the next frame
+        }
+
+        // Control the circles with arrow keys
+        window.addEventListener('keydown', (event) => {
+            const key = event.key;
+            const controlVelocity = new Vector(0, 0);
+            const speed = 1;
+
+            if (key === 'ArrowUp') {
+                controlVelocity.y -= speed;
+            } else if (key === 'ArrowDown') {
+                controlVelocity.y += speed;
+            } else if (key === 'ArrowLeft') {
+                controlVelocity.x -= speed;
+            } else if (key === 'ArrowRight') {
+                controlVelocity.x += speed;
+            }
+
+            // Update velocity for all circles
+            circles.forEach(circle => {
+                circle.velocity = circle.velocity.add(controlVelocity);
+            });
+        });
+
+        gameLoop(); // Start the animation
+    </script>
+</body>
+</html>
