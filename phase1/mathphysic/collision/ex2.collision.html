@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision Example with Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collision Simulation</h1>
+    <canvas id="canvas" width="800" height="300"></canvas>
+    
+    <div id="info"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Định nghĩa đối tượng hình chữ nhật
+        const rectangle = {
+            position: { x: 100, y: 100 },
+            velocity: { x: 5, y: 3 },
+            mass: 1,
+            width: 50,
+            height: 30
+        };
+
+        // Hàm tính toán vận tốc mới sau va chạm
+        function calculateNewVelocity(rectangle, collisionNormal) {
+            const dotProduct = rectangle.velocity.x * collisionNormal.x + rectangle.velocity.y * collisionNormal.y;
+            const newVelocity = {
+                x: rectangle.velocity.x - (2 * dotProduct * collisionNormal.x),
+                y: rectangle.velocity.y - (2 * dotProduct * collisionNormal.y)
+            };
+            return newVelocity;
+        }
+
+        // Hàm vẽ hình chữ nhật
+        function drawRectangle() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(rectangle.position.x, rectangle.position.y, rectangle.width, rectangle.height);
+        }
+
+        // Hàm cập nhật vị trí hình chữ nhật
+        function updatePosition() {
+            rectangle.position.x += rectangle.velocity.x;
+            rectangle.position.y += rectangle.velocity.y;
+
+            // Kiểm tra va chạm với biên canvas
+            if (rectangle.position.x + rectangle.width > canvas.width || rectangle.position.x < 0) {
+                const collisionNormal = { x: -1, y: 0 }; // Va chạm bên trái hoặc bên phải
+                rectangle.velocity = calculateNewVelocity(rectangle, collisionNormal);
+            }
+            if (rectangle.position.y + rectangle.height > canvas.height || rectangle.position.y < 0) {
+                const collisionNormal = { x: 0, y: -1 }; // Va chạm trên hoặc dưới
+                rectangle.velocity = calculateNewVelocity(rectangle, collisionNormal);
+            }
+        }
+
+        // Cập nhật thông tin hiển thị
+        function updateInfo() {
+            const infoDiv = document.getElementById('info');
+            infoDiv.innerHTML = `Position: (${rectangle.position.x.toFixed(2)}, ${rectangle.position.y.toFixed(2)})<br>
+                                 Velocity: (${rectangle.velocity.x.toFixed(2)}, ${rectangle.velocity.y.toFixed(2)})<br>
+                                 Mass: ${rectangle.mass}`;
+        }
+
+        // Hàm chính để chạy mô phỏng
+        function main() {
+            updatePosition();
+            drawRectangle();
+            updateInfo();
+            requestAnimationFrame(main); // Gọi lại hàm main để tạo vòng lặp
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html>
