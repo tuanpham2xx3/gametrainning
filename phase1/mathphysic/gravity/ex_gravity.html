@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Simulation</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const context = canvas.getContext("2d");
+        // Gravity acceleration (in pixels per frame squared)
+        const gravity = 0.5;
+
+        // Array to hold multiple balls
+        const balls = [];
+
+        // Function to create a new ball with random properties
+        function createBall() {
+            const newBall = {
+                position: { x: Math.random() * canvas.width, y: Math.random() * canvas.height / 2 }, // Random starting position
+                velocity: { x: 0, y: 0 }, // Initial velocity
+                radius: 20,
+                color: "blue"
+            };
+            balls.push(newBall);
+        }
+
+        // Create multiple balls
+        for (let i = 0; i < 5; i++) {
+            createBall();
+        }
+
+        // Add event listener for jump control
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") { // Jump when space is pressed
+                balls.forEach(ball => {
+                    ball.velocity.y = -10; // Set upward velocity
+                });
+            }
+        });
+
+        // Function to draw all balls
+        function drawBall() {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+            balls.forEach(ball => {
+                context.beginPath();
+                context.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2);
+                context.fillStyle = ball.color;
+                context.fill();
+                context.closePath();
+            });
+        }
+
+        // Function to apply gravity to all balls
+        function applyGravity() {
+            balls.forEach(ball => {
+                ball.velocity.y += gravity; // Apply gravity to each ball
+                ball.position.y += ball.velocity.y;
+                ball.position.x += ball.velocity.x;
+            });
+        }
+
+        // Function to check collisions for all balls
+        function checkCollision() {
+            balls.forEach(ball => {
+                if (ball.position.y + ball.radius > canvas.height) {
+                    ball.velocity.y *= -0.7; // Reverse the velocity to simulate a bounce
+                    ball.position.y = canvas.height - ball.radius; // Keep the ball above the floor
+                }
+            });
+        }
+
+        // Main game loop
+        function gameLoop() {
+            applyGravity();
+            checkCollision();
+            drawBall();
+
+            requestAnimationFrame(gameLoop); // Continue the loop
+        }
+
+        gameLoop(); // Start the animation
+    </script>
+</body>
+</html>
