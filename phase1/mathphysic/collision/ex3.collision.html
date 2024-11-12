@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Broad Phase Collision Detection</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            border: 1px solid #333;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        // ===== Khởi tạo =====
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const CONFIG = {
+            GRID_SIZE: 100,
+            RESTITUTION: 1,     // Hệ số đàn hồi
+            IMPULSE_SCALE: 0.01,   // Độ mạnh của lực đẩy
+            COLORS: {
+                GRID: '#e0e0e0',
+                COLLISION: '#FFD700'
+            }
+        };
+
+        const grid = {};
+
+        const objects = [
+            createObject(1, 50, 50, 'red', 2, 1),
+            createObject(2, 200, 200, 'blue', -1, 2),
+            createObject(3, 400, 300, 'green', 1, -2),
+            createObject(4, 600, 400, 'purple', -2, -1)
+        ];
+
+        // ===== Hàm khởi tạo đối tượng =====
+        function createObject(id, x, y, color, vx, vy) {
+            return {
+                id,
+                x, y,
+                width: 40,
+                height: 40,
+                color,
+                originalColor: color,
+                velocity: { x: vx, y: vy }
+            };
+        }
+
+        // ===== Quản lý lưới =====
+        function getGridCells(obj) {
+            const cells = [];
+            const startX = Math.floor(obj.x / CONFIG.GRID_SIZE);
+            const startY = Math.floor(obj.y / CONFIG.GRID_SIZE);
+            const endX = Math.floor((obj.x + obj.width) / CONFIG.GRID_SIZE);
+            const endY = Math.floor((obj.y + obj.height) / CONFIG.GRID_SIZE);
+
+            for (let x = startX; x <= endX; x++) {
+                for (let y = startY; y <= endY; y++) {
+                    cells.push(`${x},${y}`);
+                }
+            }
+            return cells;
+        }
+
+        function updateGrid() {
+            Object.keys(grid).forEach(key => delete grid[key]);
+            
+            objects.forEach(obj => {
+                getGridCells(obj).forEach(cell => {
+                    if (!grid[cell]) grid[cell] = [];
+                    grid[cell].push(obj);
+                });
+            });
+        }
+
+        // ===== Xử lý va chạm =====
+        function checkCollision(objA, objB) {
+            return !(
+                objA.x + objA.width < objB.x || 
+                objA.x > objB.x + objB.width || 
+                objA.y + objA.height < objB.y || 
+                objA.y > objB.y + objB.height
+            );
+        }
+
+        function resolveCollision(objA, objB) {
+            const centerA = { x: objA.x + objA.width/2, y: objA.y + objA.height/2 };
+            const centerB = { x: objB.x + objB.width/2, y: objB.y + objB.height/2 };
+            
+            const dx = centerB.x - centerA.x;
+            const dy = centerB.y - centerA.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance === 0) return;
+
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            const relativeVelocityX = objA.velocity.x - objB.velocity.x;
+            const relativeVelocityY = objA.velocity.y - objB.velocity.y;
+
+            const impulseMagnitude = -(1 + CONFIG.RESTITUTION) * 
+                (relativeVelocityX * nx + relativeVelocityY * ny);
+
+            // Áp dụng xung lực
+            objA.velocity.x -= nx * impulseMagnitude * CONFIG.IMPULSE_SCALE;
+            objA.velocity.y -= ny * impulseMagnitude * CONFIG.IMPULSE_SCALE;
+            objB.velocity.x += nx * impulseMagnitude * CONFIG.IMPULSE_SCALE;
+            objB.velocity.y += ny * impulseMagnitude * CONFIG.IMPULSE_SCALE;
+
+            // Xử lý chồng lấn
+            handleOverlap(objA, objB, dx, dy, nx, ny);
+
+            // Hiệu ứng va chạm
+            applyCollisionEffect(objA, objB);
+        }
+
+        function handleOverlap(objA, objB, dx, dy, nx, ny) {
+            const overlapX = (objA.width + objB.width)/2 - Math.abs(dx);
+            if (overlapX > 0) {
+                const separationX = (overlapX * nx) / 2;
+                objA.x -= separationX;
+                objB.x += separationX;
+            }
+
+            const overlapY = (objA.height + objB.height)/2 - Math.abs(dy);
+            if (overlapY > 0) {
+                const separationY = (overlapY * ny) / 2;
+                objA.y -= separationY;
+                objB.y += separationY;
+            }
+        }
+
+        function applyCollisionEffect(objA, objB) {
+            objA.color = CONFIG.COLORS.COLLISION;
+            objB.color = CONFIG.COLORS.COLLISION;
+            
+            setTimeout(() => {
+                objA.color = objA.originalColor;
+                objB.color = objB.originalColor;
+            }, 100);
+        }
+
+        function broadPhaseCollision() {
+            const checkedPairs = new Set();
+
+            Object.keys(grid).forEach(cell => {
+                const [x, y] = cell.split(',').map(Number);
+                
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const neighborCell = `${x + i},${y + j}`;
+                        const neighborObjects = grid[neighborCell] || [];
+                        
+                        grid[cell].forEach(objA => {
+                            neighborObjects.forEach(objB => {
+                                if (objA.id !== objB.id) {
+                                    const pairId = [objA.id, objB.id].sort().join('-');
+                                    if (!checkedPairs.has(pairId)) {
+                                        checkedPairs.add(pairId);
+                                        if (checkCollision(objA, objB)) {
+                                            resolveCollision(objA, objB);
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+        }
+
+        // ===== Cập nhật và Render =====
+        function updatePositions() {
+    objects.forEach(obj => {
+        obj.x += obj.velocity.x;
+        obj.y += obj.velocity.y;
+
+        // Xử lý va chạm với biên và thêm đàn hồi
+        if (obj.x < 0) {
+            obj.x = 0;
+            obj.velocity.x = Math.abs(obj.velocity.x) * CONFIG.RESTITUTION;
+        } else if (obj.x + obj.width > canvas.width) {
+            obj.x = canvas.width - obj.width;
+            obj.velocity.x = -Math.abs(obj.velocity.x) * CONFIG.RESTITUTION;
+        }
+
+        if (obj.y < 0) {
+            obj.y = 0;
+            obj.velocity.y = Math.abs(obj.velocity.y) * CONFIG.RESTITUTION;
+        } else if (obj.y + obj.height > canvas.height) {
+            obj.y = canvas.height - obj.height;
+            obj.velocity.y = -Math.abs(obj.velocity.y) * CONFIG.RESTITUTION;
+        }
+    });
+}
+
+        function drawGrid() {
+            ctx.strokeStyle = CONFIG.COLORS.GRID;
+            ctx.lineWidth = 0.5;
+            
+            for (let x = 0; x < canvas.width; x += CONFIG.GRID_SIZE) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < canvas.height; y += CONFIG.GRID_SIZE) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawObjects() {
+            objects.forEach(obj => {
+                ctx.fillStyle = obj.color;
+                ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+            });
+        }
+
+        // ===== Game Loop =====
+        function main() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            updatePositions();
+            drawGrid();
+            updateGrid();
+            broadPhaseCollision();
+            drawObjects();
+            
+            requestAnimationFrame(main);
+        }
+
+        // ===== Khởi chạy =====
+        main();
+    </script>
+</body>
+</html>
