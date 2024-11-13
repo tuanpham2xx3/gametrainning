@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision Detection</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        class Bullet {
+            constructor(position, velocity) {
+                this.position = position; // Vị trí hiện tại của viên đạn
+                this.velocity = velocity; // Vector vận tốc của viên đạn
+            }
+
+            // Phương thức cập nhật vị trí viên đạn
+            update(deltaTime) {
+                this.position.x += this.velocity.x * deltaTime;
+                this.position.y += this.velocity.y * deltaTime;
+            }
+
+            // Phương thức để lấy đường đi dự kiến
+            getProjectedPath(time) {
+                return {
+                    x: this.position.x + this.velocity.x * time,
+                    y: this.position.y + this.velocity.y * time
+                };
+            }
+        }
+
+        // Đối tượng tĩnh
+        const stationaryObject = {
+            x: 400,
+            y: 300,
+            width: 50,
+            height: 50
+        };
+
+        // Phương thức phát hiện va chạm
+        function detectCollision(bullet) {
+            const projectedPosition = bullet.getProjectedPath(1); // Dự đoán 1 giây tới
+            // Kiểm tra va chạm với đối tượng tĩnh
+            if (projectedPosition.x >= stationaryObject.x && projectedPosition.x <= stationaryObject.x + stationaryObject.width &&
+                projectedPosition.y >= stationaryObject.y && projectedPosition.y <= stationaryObject.y + stationaryObject.height) {
+                return true; 
+            }
+            return false; 
+        }
+
+        // Khởi tạo viên đạn
+        const bullet = new Bullet({ x: 50, y: 300 }, { x: 500, y: 0 }); // Di chuyển nhanh từ trái sang phải
+
+        // Vòng lặp vẽ
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+
+            // Cập nhật và vẽ viên đạn
+            bullet.update(0.016); // Giả sử deltaTime là 16ms
+            ctx.fillStyle = 'red';
+            ctx.fillRect(bullet.position.x, bullet.position.y, 10, 5); // Vẽ viên đạn
+
+            // Vẽ đối tượng tĩnh
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(stationaryObject.x, stationaryObject.y, stationaryObject.width, stationaryObject.height); // Vẽ đối tượng tĩnh
+
+            // Kiểm tra va chạm
+            if (detectCollision(bullet)) {
+                console.log("Va chạm phát hiện!");
+            }
+
+            requestAnimationFrame(gameLoop); // Gọi lại vòng lặp
+        }
+
+        gameLoop(); // Bắt đầu vòng lặp trò chơi
+    </script>
+</body>
+</html>
