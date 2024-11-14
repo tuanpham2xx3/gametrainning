@@ -1,3 +1,4 @@
+<!-- phase1/mathphysic/collision/ex4.collision.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,17 +19,15 @@
 
         class Bullet {
             constructor(position, velocity) {
-                this.position = position; // Vị trí hiện tại của viên đạn
-                this.velocity = velocity; // Vector vận tốc của viên đạn
+                this.position = position;
+                this.velocity = velocity;
             }
 
-            // Phương thức cập nhật vị trí viên đạn
             update(deltaTime) {
                 this.position.x += this.velocity.x * deltaTime;
                 this.position.y += this.velocity.y * deltaTime;
             }
 
-            // Phương thức để lấy đường đi dự kiến
             getProjectedPath(time) {
                 return {
                     x: this.position.x + this.velocity.x * time,
@@ -37,50 +36,65 @@
             }
         }
 
-        // Đối tượng tĩnh
         const stationaryObject = {
             x: 400,
             y: 300,
             width: 50,
-            height: 50
+            height: 50,
+            velocity: { x: 0, y: 0 } // Vận tốc ban đầu là 0
         };
 
-        // Phương thức phát hiện va chạm
         function detectCollision(bullet) {
-            const projectedPosition = bullet.getProjectedPath(1); // Dự đoán 1 giây tới
-            // Kiểm tra va chạm với đối tượng tĩnh
+            const projectedPosition = bullet.getProjectedPath(1);
             if (projectedPosition.x >= stationaryObject.x && projectedPosition.x <= stationaryObject.x + stationaryObject.width &&
                 projectedPosition.y >= stationaryObject.y && projectedPosition.y <= stationaryObject.y + stationaryObject.height) {
-                return true; 
+                return true;
             }
-            return false; 
+            return false;
         }
 
-        // Khởi tạo viên đạn
-        const bullet = new Bullet({ x: 50, y: 300 }, { x: 500, y: 0 }); // Di chuyển nhanh từ trái sang phải
+        function handleCollision(bullet) {
+            const bulletDirection = {
+                x: bullet.velocity.x,
+                y: bullet.velocity.y
+            };
 
-        // Vòng lặp vẽ
+            const magnitude = Math.sqrt(bulletDirection.x ** 2 + bulletDirection.y ** 2);
+            if (magnitude > 0) {
+                stationaryObject.velocity.x = (bulletDirection.x / magnitude) * 200; // Tính toán vận tốc mới cho đối tượng tĩnh
+                stationaryObject.velocity.y = (bulletDirection.y / magnitude) * 200;
+            }
+
+            bullet.position.x = stationaryObject.x + stationaryObject.width; // Đặt viên đạn ra ngoài vật thể
+        }
+
+        const bullet = new Bullet({ x: 50, y: 300 }, { x: 500, y: 0 });
+
         function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Cập nhật và vẽ viên đạn
-            bullet.update(0.016); // Giả sử deltaTime là 16ms
+            bullet.update(0.016);
             ctx.fillStyle = 'red';
-            ctx.fillRect(bullet.position.x, bullet.position.y, 10, 5); // Vẽ viên đạn
+            ctx.fillRect(bullet.position.x, bullet.position.y, 10, 5);
 
-            // Vẽ đối tượng tĩnh
             ctx.fillStyle = 'blue';
-            ctx.fillRect(stationaryObject.x, stationaryObject.y, stationaryObject.width, stationaryObject.height); // Vẽ đối tượng tĩnh
+            ctx.fillRect(stationaryObject.x, stationaryObject.y, stationaryObject.width, stationaryObject.height);
 
-            // Kiểm tra va chạm
             if (detectCollision(bullet)) {
                 console.log("Va chạm phát hiện!");
+                handleCollision(bullet);
             }
 
-            requestAnimationFrame(gameLoop); // Gọi lại vòng lặp
+            stationaryObject.x += stationaryObject.velocity.x * 0.016; // Cập nhật vị trí đối tượng tĩnh
+            stationaryObject.y += stationaryObject.velocity.y * 0.016;
+
+            stationaryObject.velocity.x *= 0.98; // Giảm 2% mỗi khung hình
+            stationaryObject.velocity.y *= 0.98; // Giảm 2% mỗi khung hình
+
+            requestAnimationFrame(gameLoop);
         }
 
-        gameLoop(); // Bắt đầu vòng lặp trò chơi
+        gameLoop();
     </script>
 </body>
 </html>
