@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+    <script>
+        let canvas = document.getElementById('myCanvas');
+        let context = canvas.getContext('2d');
+
+        let arm = {
+            position: { x: 300, y: 200 },
+            length: 150,
+            width: 20,
+            rotation: 0,
+            speed: 0.02
+        };
+
+        function drawRotatingArm(arm) {
+            context.save();
+            context.translate(arm.position.x, arm.position.y);
+            context.rotate(arm.rotation);
+            context.fillStyle = "blue";
+            context.fillRect(0, -arm.width / 2, arm.length, arm.width);
+            context.restore();
+        }
+
+        function updateRotation(arm) {
+            arm.rotation += arm.speed;
+        }
+
+        function gameLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            updateRotation(arm);
+            drawRotatingArm(arm);
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
