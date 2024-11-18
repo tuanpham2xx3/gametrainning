@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xoay Nhiều Hình Chữ Nhật Trên Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="400"></canvas>
+    <script>
+        let canvas = document.getElementById('myCanvas');
+        let context = canvas.getContext('2d');
+
+        // Mảng chứa nhiều hình chữ nhật
+        let rectangles = [
+            { position: { x: 300, y: 200 }, width: 100, height: 50, rotation: 0, speed: 0.05 }
+        ];
+
+        // Thêm biến để lưu vị trí chuột
+        let mousePosition = { x: 0, y: 0 };
+
+        // Hàm để cập nhật vị trí chuột
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePosition.x = event.clientX - rect.left;
+            mousePosition.y = event.clientY - rect.top;
+        });
+
+        function drawRotatedRectangle(rect) {
+            context.save(); // Lưu trạng thái hiện tại của ngữ cảnh
+
+            // Di chuyển gốc tọa độ đến trung tâm hình chữ nhật
+            context.translate(rect.position.x, rect.position.y);
+
+            // Xoay ngữ cảnh theo góc xoay của hình chữ nhật
+            context.rotate(rect.rotation);
+
+            // Vẽ hình chữ nhật (tại gốc tọa độ hiện tại)
+            context.fillStyle = "green";
+            context.fillRect(-rect.width / 2, -rect.height / 2, rect.width, rect.height);
+
+            context.restore(); // Khôi phục ngữ cảnh về trạng thái ban đầu
+        }
+
+        function updateRotation(rect) {
+            // Tính toán góc giữa hình chữ nhật và vị trí chuột
+            const dx = mousePosition.x - rect.position.x;
+            const dy = mousePosition.y - rect.position.y;
+            rect.rotation = Math.atan2(dy, dx); // Cập nhật góc xoay
+        }
+
+        function gameLoop() {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+
+            // Cập nhật và vẽ từng hình chữ nhật
+            rectangles.forEach(rect => {
+                updateRotation(rect);
+                drawRotatedRectangle(rect);
+            });
+
+            requestAnimationFrame(gameLoop); // Tiếp tục vòng lặp
+        }
+
+        gameLoop(); // Bắt đầu hoạt động
+    </script>
+</body>
+</html>
