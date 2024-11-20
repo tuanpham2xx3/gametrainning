@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpolation Animation</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const context = canvas.getContext("2d");
+
+        let square = {
+            position: { x: 300, y: 200 },
+            size: 50, // Initial size of the square
+            color: "red"
+        };
+
+        let animation = {
+            startSize: 50,
+            endSize: 150, // Maximum size
+            duration: 4000, // in milliseconds
+            startTime: null
+        };
+
+        function lerp(start, end, t) {
+            return start + (end - start) * t;
+        }
+
+        let lastTime = 0;
+
+        function animateSquare(time) {
+            if (!animation.startTime) animation.startTime = time;
+
+            const elapsed = time - animation.startTime;
+            let t = Math.min(elapsed / animation.duration, 1);
+            t = easeInOutQuad(t); // Apply ease-in-out effect to the interpolation factor
+
+            // Scale the square size
+            square.size = lerp(animation.startSize, animation.endSize, t);
+
+            // Rotate the square
+            const angle = t * Math.PI * 2; // Full rotation (360 degrees)
+            
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawSquare(square, angle);
+
+            if (t < 1) requestAnimationFrame(animateSquare);
+        }
+
+        function drawSquare({ position, size, color }, angle) {
+            context.save(); // Save the current state
+            context.translate(position.x, position.y); // Move to the square's position
+            context.rotate(angle); // Rotate the context
+            context.fillStyle = color;
+            context.fillRect(-size / 2, -size / 2, size, size); // Draw the square centered at (0, 0)
+            context.restore(); // Restore the original state
+        }
+
+        // Easing function for ease-in-out effect
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // Ease-in-out easing
+        }
+
+        requestAnimationFrame(animateSquare);
+    </script>
+</body>
+</html>
