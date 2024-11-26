@@ -1,0 +1,54 @@
+<!-- phase1/displayiamge/get_a_ref.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get a Reference to an HTML Image Element</title>
+</head>
+<body>
+    
+    <img id="myImage" src="anh.jpg" alt="My Image" style="display: none;">
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+
+    <script>
+        // Get a reference to the image element
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext("2d");
+        let img = document.getElementById("myImage");
+
+        img.onload = function() {
+            // Vẽ hình ảnh lên canvas tại tọa độ đã chỉ định
+            //context.drawImage(img, 10, 30);
+            //context.drawImage(img, 10, 30, img.width / 2, img.height / 2);
+            //context.imageSmoothingEnabled = true;
+            //context.imageSmoothingQuality = 'high';
+            //context.drawImage(img, 10, 30, img.width * 3, img.height * 3);
+            //context.clearRect(0, 0, canvas.width, canvas.height);
+            //context.drawImage(img, 100, 0, 200, 50, 10, 30, 200, 50);
+            // Define the size of a frame
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            //context.drawImage(img, 100, 0, 200, 50, 10, 30, 200, 50);
+            
+            // Define the size of a frame
+            let frameWidth = 50;
+            let frameHeight = 61;
+
+            // Rows and columns start from 0
+            let row = 1;
+            let column = 3;
+            let totalColumns = 5; // Define total columns for sprite animation
+
+            let sprite = img;
+            context.drawImage(sprite, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 10, 30, frameWidth, frameHeight);
+            function updateSprite() {
+                column = (column + 1) % totalColumns; // Update column for animation
+                // Redraw the sprite with updated column
+                context.clearRect(10, 30, frameWidth, frameHeight); // Clear previous sprite
+                context.drawImage(sprite, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 10, 30, frameWidth, frameHeight);
+            }
+            setInterval(updateSprite, 100);
+        };
+    </script>
+</body>
+</html>
