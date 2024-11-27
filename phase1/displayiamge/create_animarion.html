@@ -1,0 +1,52 @@
+<!-- phase1/displayiamge/get_a_ref.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get a Reference to an HTML Image Element</title>
+</head>
+<body>
+    
+    <img id="myImage" src="animation.jpg" alt="My Image" style="display: none;">
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+
+    <script>
+        // Get a reference to the image element
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext("2d");
+        let img = document.getElementById("myImage");
+
+        img.onload = function() {
+        // Define the number of columns and rows in the sprite
+        let numColumns = 5;
+        let numRows = 2
+
+        // Define the size of a frame
+        let frameWidth = img.width / numColumns; // Changed from sprite to img
+        let frameHeight = img.height / numRows; // Changed from sprite to img
+
+        // The sprite image frame starts from 0
+        let currentFrame = 0;
+
+        setInterval(function() {
+            // Pick a new frame
+            currentFrame++;
+            // Make the frames loop
+            let maxFrame = numColumns * numRows - 1;
+            if (currentFrame > maxFrame) {
+                currentFrame = 0;
+            }
+
+            // Update rows and columns
+            let column = currentFrame % numColumns;
+            let row = Math.floor(currentFrame / numColumns);
+
+            // Clear and draw
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(img, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 10, 30, frameWidth, frameHeight);
+        }, 100);            
+        };
+    </script>
+</body>
+</html>
