@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get a Reference to an HTML Image Element</title>
+</head>
+<body>
+    
+    <img id="myImage" src="anh.jpg" alt="My Image" style="display: none;">
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+
+    <script>
+        // Get a reference to the image element
+        let canvas = document.getElementById("myCanvas");
+        let context = canvas.getContext("2d");
+        let img = document.getElementById("myImage");
+        
+        class Circle {
+            constructor(context, x, y, radius, vx, vy) {
+                this.context = context;
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.vx = vx; // Velocity in x direction
+                this.vy = vy; // Velocity in y direction
+                this.angle = 0; // Angle of rotation
+                // Load your sprite image here
+                Circle.image = new Image();
+                Circle.image.src = "anh.jpg"; // Your sprite image
+                Circle.frameWidth = 80; // Set your frame width
+                Circle.frameHeight = 80; // Set your frame height
+            }
+
+            update(secondsPassed) {
+                // Update the angle for continuous rotation
+                this.angle += 360 * secondsPassed; // Rotate 360 degrees per second
+                if (this.angle >= 360) {
+                    this.angle -= 360; // Reset angle to keep it within 0-360
+                }
+            }
+
+            draw() {
+                // Set the origin to the center of the canvas
+                this.context.translate(canvas.width / 2, canvas.height / 2);
+                this.context.rotate(Math.PI / 180 * this.angle); // Rotate by angle
+
+                // Draw the image, rotated
+                this.context.drawImage(Circle.image, -Circle.frameWidth / 2, -Circle.frameHeight / 2, Circle.frameWidth, Circle.frameHeight);
+
+                // Reset transformation matrix
+                this.context.setTransform(1, 0, 0, 1, 0, 0);
+            }
+        }
+
+        function main() {
+            let circle = new Circle(context, 200, 150, 40, 0, 0); // Tạo một đối tượng Circle
+            let lastTime = 0;
+
+            function loop(timestamp) {
+                let secondsPassed = (timestamp - lastTime) / 1000;
+                lastTime = timestamp;
+
+                context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+                circle.update(secondsPassed); // Cập nhật vị trí của circle
+                circle.draw(); // Vẽ circle
+
+                requestAnimationFrame(loop); // Gọi lại hàm loop
+            }
+
+            requestAnimationFrame(loop); // Bắt đầu vòng lặp
+        }
+
+        main(); // Gọi hàm main để bắt đầu
+    </script>
+</body>
+</html>
