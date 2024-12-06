@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FALLING STAR</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            align-items: flex-start; /* Căn giữa theo chiều dọc ở phía trên */
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        canvas {
+            border: 1px solid black; /* Thêm viền cho canvas (tùy chọn) */
+        }
+        #myCanvas {
+            margin-right: 20px; /* Khoảng cách từ myCanvas đến board */
+        }
+        #board {
+            width: 300px; /* Chiều rộng của board */
+            height: 200px; /* Chiều cao của board */
+            border: 1px solid blue; /* Viền cho board */
+            position: relative; /* Để định vị nút bên trong */
+            display: flex; /* Sử dụng flexbox để căn giữa nội dung */
+            flex-direction: column; /* Sắp xếp theo chiều dọc */
+            justify-content: flex-end; /* Căn giữa theo chiều dọc ở phía dưới */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            color: white; /* Màu chữ */
+            font-size: 20px; /* Kích thước chữ */
+        }
+        #restartButton {
+            padding: 10px 20px; /* Padding cho nút */
+            font-size: 16px; /* Kích thước chữ */
+            display: none; /* Ẩn nút ban đầu */
+            background-color: #4CAF50; /* Màu nền */
+            color: white; /* Màu chữ */
+            border: none; /* Bỏ viền */
+            border-radius: 5px; /* Bo góc */
+            cursor: pointer; /* Con trỏ chuột khi hover */
+            margin-bottom: 10px; /* Khoảng cách từ dưới lên */
+        }
+        #restartButton:hover {
+            background-color: #45a049; /* Màu nền khi hover */
+        }
+        #hud {
+        margin-bottom: 10px; /* Khoảng cách từ HUD đến nút Restart */
+        font-size: 20px; /* Kích thước chữ */
+        color: black; /* Màu chữ */
+
+    }
+    </style>
+</head>
+<body>
+    
+    <canvas id="myCanvas" width="400" height="600"></canvas> <!-- Canvas chính -->
+    <div id="board"> <!-- Sử dụng div để chứa board -->
+        <div id="hud">Score: 0 | Lives: 3</div> <!-- Hiển thị điểm và mạng -->
+        <button id="restartButton">Restart</button> <!-- Nút Restart nằm trong board -->
+    </div>
+
+    <script>
+        class GameManager {
+            constructor() {
+                this.score = 0;
+                this.lives = 3; // Số mạng
+                this.state = 'playing'; // Các trạng thái có thể: 'playing', 'paused', 'gameOver'
+            }
+        
+            setState(newState) {
+                this.state = newState;
+            }
+        
+            updateScore(points) {
+                this.score += points;
+                this.updateHUD(); // Cập nhật HUD khi điểm thay đổi
+            }
+        
+            resetGame() {
+                this.score = 0;
+                this.lives = 3;
+                this.state = 'playing';
+                document.getElementById('restartButton').style.display = 'none'; // Ẩn nút khi khởi động lại
+                this.updateHUD(); // Cập nhật HUD khi khởi động lại
+            }
+
+            updateHUD() {
+                const hud = document.getElementById('hud');
+                hud.innerHTML = `Score: ${this.score} | Lives: ${this.lives}`; // Cập nhật hiển thị điểm và mạng
+            }
+        }
+
+        class Player {
+            constructor() {
+                this.x = 0; // Vị trí ngang ban đầu
+                this.width = 250; // Chiều rộng của người chơi
+                this.height = 250; // Chiều cao của người chơi
+                this.image = new Image(); // Tạo đối tượng Image
+                this.image.src = './char.png'; // Đường dẫn đến file ảnh của người chơi
+            
+                // Kiểm tra xem ảnh đã được tải thành công chưa
+                this.image.onload = () => {
+                    console.log('Player image loaded successfully');
+                };
+            
+                this.image.onerror = () => {
+                    console.error('Error loading player image');
+                };
+            
+                this.direction = 1; // 1: phải, -1: trái
+            }
+        
+            move(direction) {
+                this.x += direction * 15; // Di chuyển người chơi sang trái hoặc phải
+                this.direction = direction; // Cập nhật hướng di chuyển
+            }
+        
+            draw(context) {
+                context.save(); // Lưu trạng thái canvas
+                context.translate(this.x + this.width / 2, 450 + this.height / 2); // Di chuyển gốc tọa độ
+                if (this.direction === -1) {
+                    context.scale(1, 1); // Không lật ảnh
+                } else {
+                    context.scale(-1, 1); // Lật ảnh
+                }
+                context.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height); // Vẽ ảnh người chơi
+                context.restore(); // Khôi phục trạng thái canvas
+            }
+        }
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * 350; // Vị trí ngang ngẫu nhiên
+                this.y = 0; // Bắt đầu từ trên cùng
+                this.size = 80; // Kích thước của ngôi sao
+                this.speed = 2; // Tốc độ rơi
+                this.image = new Image();
+                this.image.src = './star.png'
+            }
+
+            fall() {
+                this.y += this.speed; // Di chuyển ngôi sao xuống
+            }
+
+            draw(context) {
+                context.drawImage(this.image, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);    
+            }
+
+            checkCollision(player) {
+                return (
+                    this.x < player.x + player.width &&
+                    this.x + this.size > player.x &&
+                    this.y < player.height + 285 &&
+                    this.y + this.size > 610
+                );
+            }
+        }
+
+        class AudioManager {
+            constructor() {
+                this.sounds = {};
+            }
+        
+            loadSound(name, src) {
+                const audio = new Audio(src);
+                this.sounds[name] = audio;
+            }
+        
+            playSound(name) {
+                if (this.sounds[name]) this.sounds[name].play();
+            }
+        }
+
+        const gameManager = new GameManager();
+        const player = new Player();
+        const stars = [];
+        const audioManager = new AudioManager();
+        audioManager.loadSound('ting', './ting.mp3');
+        audioManager.loadSound('background', './background.mp3')
+
+        let starSpawnTime = 0; // Biến theo dõi thời gian đã trôi qua
+        let speedscore = 1;
+
+        function gameLoop() {
+            const canvas = document.getElementById('myCanvas');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height); // Xóa canvas
+
+            // Vẽ người chơi
+            player.draw(context);
+
+            if (gameManager.state === 'playing') {
+                audioManager.playSound('background');
+            }
+
+            // Cập nhật thời gian và tạo ngôi sao mỗi giây
+            starSpawnTime += 1 / 240; // Giả sử game loop chạy 60 lần mỗi giây
+            if (starSpawnTime >= speedscore) { // Nếu đã trôi qua 1 giây
+                stars.push(new Star()); // Tạo ngôi sao mới
+                starSpawnTime = 0; // Reset thời gian
+            }
+
+            // Cập nhật và vẽ ngôi sao
+            stars.forEach((star, index) => {
+                star.fall();
+                star.draw(context);
+                if (star.checkCollision(player)) {
+                    gameManager.updateScore(10); // Tăng điểm
+                    speedscore -= 0.05;
+                    audioManager.playSound('ting'); // Phát âm thanh khi bắt được ngôi sao
+                    stars.splice(index, 1); // Xóa ngôi sao
+                } else if (star.y > canvas.height) {
+                    gameManager.lives--; // Giảm mạng nếu ngôi sao rơi xuống
+                    stars.splice(index, 1); // Xóa ngôi sao
+                    gameManager.updateHUD();
+                }
+            });
+
+            if (gameManager.lives > 0) {
+                requestAnimationFrame(gameLoop); // Tiếp tục vòng lặp trò chơi
+            } else {
+                speedscore = 1;
+                document.getElementById('restartButton').style.display = 'block'; // Hiện nút khi game over
+                alert('Game Over!'); // Kết thúc trò chơi
+            }
+        }
+
+        // Xử lý đầu vào
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') player.move(-1);
+            if (e.key === 'ArrowRight') player.move(1);
+        });
+
+        // Xử lý nút Restart
+        document.getElementById('restartButton').addEventListener('click', () => {
+            gameManager.resetGame(); // Khởi động lại trò chơi
+            stars.length = 0; // Xóa tất cả các ngôi sao
+            gameLoop(); // Bắt đầu lại vòng lặp trò chơi
+        });
+
+        // Bắt đầu vòng lặp trò chơi
+        gameLoop();
+    </script>
+</body>
+</html>
