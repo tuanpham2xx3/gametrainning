@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey of Elaina</title>
+    <script src="scrip.js"></script>
+    <script src="move.js"></script>
+    <style>
+        .canvas-container {
+            position: relative;
+            width: 400px; /* Đặt chiều rộng cho container */
+            height: 300px; /* Đặt chiều cao cho container */
+        }
+        canvas {
+            position: absolute; /* Đặt vị trí tuyệt đối cho canvas */
+            top: 0;
+            left: 0;
+        }
+        #canvas2 {
+            top: 20px;
+            left: 20px;
+        }
+
+    </style>
+</head>
+<body> 
+    <div class="canvas-container">
+        <canvas id="canvas1" width="1000" height="650"></canvas>
+        <canvas id="canvas2" width="500" height="600"></canvas>
+    </div>
+    <script>
+        const player = new Player();
+        let bullets = [];
+        let lastBulletTime = 0;
+        let dps = 10; // số đạn trên giây
+        const canvas2 = document.getElementById('canvas2');
+        const context2 = canvas2.getContext('2d');
+        const boss = new Boss();
+
+
+        function SpawnBoss() {
+            boss.draw(context2);
+        }
+        function Canvas1(canvasId, imageUrl) {
+            const canvas = document.getElementById(canvasId);
+            const context = canvas.getContext('2d');
+            const image = new Image();
+            image.src = imageUrl;
+
+
+            image.onload = function() {
+                context.imageSmoothingEnabled = false;
+                context.drawImage(image, 0, 0, canvas.width, canvas.height); // Vẽ ảnh lên canvas
+            };
+        }
+        // Gọi hàm để vẽ ảnh lên canvas1
+        function Canvas2() {
+            context2.fillStyle = 'rgba(255, 255, 255, 1)'; // Màu nền cho canvas 2 với độ trong suốt
+            context2.fillRect(0, 0, canvas2.width, canvas2.height);
+            player.draw(context2)
+
+        }     
+        function gameLoop(timestamp) {
+            handleMovement(player);
+            player.update();
+            boss.update();
+            boss.move();
+            Canvas2();
+            if (timestamp - lastBulletTime > 1000/dps) { // Kiểm tra nếu đã qua 1 giây
+                const bullet = new Bullet(player);
+                bullets.push(bullet); // Add new bullet to the array
+                lastBulletTime = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
+    }
+            bullets.forEach(bullet => {
+                bullet.draw(context2); // Draw the bullet
+                bullet.shoot(); // Move the bullet
+        });
+
+            SpawnBoss();
+            requestAnimationFrame(gameLoop);
+        }
+        Canvas1('canvas1', './background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
+        gameLoop();
+    </script>
+</body>
+</html>
