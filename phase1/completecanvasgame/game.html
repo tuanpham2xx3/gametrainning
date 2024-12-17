@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Journey of Elaina</title>
-    <script src="scrip.js"></script>
-    <script src="move.js"></script>
+    <script src="class/boss.js"></script>
+    <script src="class/bullet.js"></script>
+    <script src="class/player.js"></script>
+    <script src="handle/move.js"></script>
     <style>
         .canvas-container {
             position: relative;
@@ -33,7 +35,7 @@
         const player = new Player();
         let bullets = [];
         let lastBulletTime = 0;
-        let dps = 10; // số đạn trên giây
+        let dps = 0; // số đạn trên giây
         const canvas2 = document.getElementById('canvas2');
         const context2 = canvas2.getContext('2d');
         const boss = new Boss();
@@ -62,13 +64,14 @@
 
         }     
         function gameLoop(timestamp) {
+            dps = player.dps;
             handleMovement(player);
             player.update();
             boss.update();
             boss.move();
             Canvas2();
             if (timestamp - lastBulletTime > 1000/dps) { // Kiểm tra nếu đã qua 1 giây
-                const bullet = new Bullet(player);
+                const bullet = new BulletPlayer(player);
                 bullets.push(bullet); // Add new bullet to the array
                 lastBulletTime = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
     }
@@ -80,7 +83,7 @@
             SpawnBoss();
             requestAnimationFrame(gameLoop);
         }
-        Canvas1('canvas1', './background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
+        Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
         gameLoop();
     </script>
 </body>
