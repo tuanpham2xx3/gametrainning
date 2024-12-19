@@ -2,8 +2,7 @@ class Boss {
     constructor() {
         this.x = 210;
         this.y = 50;
-        this.width = 80;
-        this.height = 80;
+        this.rad = 50;
         this.image = new Image();
         this.image.src = './asset/boss.png';
         this.speedX = 0;
@@ -12,10 +11,25 @@ class Boss {
         this.directionx = 1;
         this.directiony = 1;
         this.hp = 100000000;
+        this.frameWidth = 191; // Chiều rộng của mỗi frame
+        this.frameHeight = 161; // Chiều cao của mỗi frame
+        this.currentFrame = 0; // Khung hình hiện tại
+        this.totalFrames = 12; // Tổng số khung hình
+        this.frameDelay = 200; // Thời gian giữa các khung hình (ms)
+        this.lastFrameTime = 0;
     }
     draw(context) {
-        context.fillStyle = 'black';
-        context.drawImage(this.image, this.x, this.y, this.width, this.height);
+        context.drawImage(
+            this.image,
+            (this.currentFrame % 3) * this.frameWidth, // Vị trí x của frame (3 khung hình trên mỗi hàng)
+            Math.floor(this.currentFrame / 3) * this.frameHeight, // Vị trí y của frame
+            this.frameWidth, // Chiều rộng của frame
+            this.frameHeight, // Chiều cao của frame
+            this.x - this.frameWidth / 2, // Vị trí x để vẽ
+            this.y - this.frameHeight / 2, // Vị trí y để vẽ
+            this.frameWidth, // Chiều rộng để vẽ
+            this.frameHeight // Chiều cao để vẽ
+        );
     }
     move() {
         let step = 1;
@@ -62,5 +76,11 @@ class Boss {
     update() {
         this.speedX *= 0.1;
         this.speedY *= 0.1;
+    }
+    updateBoss(currentTime) {
+        if (currentTime - this.lastFrameTime >= this.frameDelay) {
+            this.currentFrame = (this.currentFrame + 1) % this.totalFrames; // Cập nhật khung hình
+            this.lastFrameTime = currentTime; // Cập nhật thời gian của khung hình hiện tại
+        }
     }
 }

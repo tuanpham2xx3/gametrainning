@@ -1,7 +1,12 @@
 class GameManager {
-    constructor() {
+    constructor(hpplayer, hpboss, p , b) {
+        this.xp = p.x;
+        this.yp = p.y;
+        this.xb = b.x;
+        this.yb = b.y;
         this.score = 0;
-        this.lives = 3;
+        this.hpPlayer = hpplayer;
+        this.hpBoss = hpboss;
         this.sate = 'playing';
     }
     setState(newState) {
@@ -21,8 +26,18 @@ class GameManager {
         this.updateHUD(); // Cập nhật HUD khi khởi động lại
     }
 
-    updateHUD() {
-        const hud = document.getElementById('hud');
-        hud.innerHTML = `Score: ${this.score} | Lives: ${this.lives}`; // Cập nhật hiển thị điểm và mạng
+    draw(context) {
+        context.fillStyle = 'red';
+        context.font = '30px Arial';
+        context.fillText('HP PLAYER: ' + this.hpPlayer, 550, 100);
+        context.fillText('HP BOSS: ' + this.hpBoss, 550, 150);
+        context.fillText('X PLAYER: ' + this.xp, 550, 200);
+        context.fillText('Y PLAYER: ' + this.yp, 550, 250);
+        if(this.xp > 250) {
+            this.hpPlayer -= 1;
+        }
+    }
+    hpplayer() {
+        return this.hpPlayer;
     }
 }

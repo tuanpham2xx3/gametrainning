@@ -8,6 +8,8 @@
     <script src="class/bullet.js"></script>
     <script src="class/player.js"></script>
     <script src="handle/move.js"></script>
+    <script src="handle/GameManager.js"></script>
+    <script src="handle/Collision.js"></script>
     <style>
         .canvas-container {
             position: relative;
@@ -28,40 +30,56 @@
 </head>
 <body> 
     <div class="canvas-container">
-        <canvas id="canvas1" width="1000" height="650"></canvas>
+        <canvas id="canvas1" width="1200" height="650"></canvas>
         <canvas id="canvas2" width="500" height="600"></canvas>
     </div>
     <script>
-        const player = new Player();
-        let bullets = [];
-        let lastBulletTime = 0;
-        let dps = 0; // số đạn trên giây
         const canvas2 = document.getElementById('canvas2');
         const context2 = canvas2.getContext('2d');
+        const player = new Player();
         const boss = new Boss();
+        let bullets = [];
+        let bulletsBoss = [];
+        let lastBulletTime = 0;
+        let lastBulletTime1 = 0;
+        let lastBulletTime2 = 0;
+        let dps = 0; // số đạn trên giây
+        let hpPlayer = player.hp;
+        let hpBoss = boss.hp;
+
+        
 
 
         function SpawnBoss() {
             boss.draw(context2);
         }
         function Canvas1(canvasId, imageUrl) {
-            const canvas = document.getElementById(canvasId);
-            const context = canvas.getContext('2d');
+            const canvas1 = document.getElementById(canvasId);
+            const context = canvas1.getContext('2d');
+            const gameManager = new GameManager(hpPlayer , hpBoss, player, boss);
             const image = new Image();
             image.src = imageUrl;
 
+            gameManager.draw(context);
+            //hpPlayer = gameManager.hpplayer();
 
             image.onload = function() {
                 context.imageSmoothingEnabled = false;
-                context.drawImage(image, 0, 0, canvas.width, canvas.height); // Vẽ ảnh lên canvas
+                context.drawImage(image, 0, 0, canvas1.width, canvas1.height); // Vẽ ảnh lên canvas
             };
+
         }
         // Gọi hàm để vẽ ảnh lên canvas1
         function Canvas2() {
             context2.fillStyle = 'rgba(255, 255, 255, 1)'; // Màu nền cho canvas 2 với độ trong suốt
             context2.fillRect(0, 0, canvas2.width, canvas2.height);
             player.draw(context2)
-
+            const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
+            coll.checkBulletCollision(boss);
+            coll.checkBulletBoss(player);
+            //bullets = coll.getRemainingBullets();
+            hpPlayer = coll.hpPlayer();
+            hpBoss = coll.hpBoss();
         }     
         function gameLoop(timestamp) {
             dps = player.dps;
@@ -69,21 +87,36 @@
             player.update();
             boss.update();
             boss.move();
+        
+
             Canvas2();
-            if (timestamp - lastBulletTime > 1000/dps) { // Kiểm tra nếu đã qua 1 giây
+            if (timestamp - lastBulletTime > 1000/50) { // Kiểm tra nếu đã qua 1 giây
+                const bulletboss = new BulletBoss(boss);
+                bulletsBoss.push(bulletboss); // Add new bullet to the array
+                lastBulletTime = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
+    }
+            bulletsBoss.forEach(bullet => {
+                bullet.draw(context2); // Draw the bullet
+                bullet.shoot(); // Move the bullet
+        });
+            if (timestamp - lastBulletTime1 > 1000/dps) { // Kiểm tra nếu đã qua 1 giây
                 const bullet = new BulletPlayer(player);
                 bullets.push(bullet); // Add new bullet to the array
-                lastBulletTime = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
+                lastBulletTime1 = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
     }
             bullets.forEach(bullet => {
                 bullet.draw(context2); // Draw the bullet
                 bullet.shoot(); // Move the bullet
         });
+            
+            boss.updateBoss(timestamp);
+            
 
             SpawnBoss();
             requestAnimationFrame(gameLoop);
+            Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
         }
-        Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
+
         gameLoop();
     </script>
 </body>

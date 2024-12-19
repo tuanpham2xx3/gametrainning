@@ -4,6 +4,7 @@ class Player {
         this.y = 550;
         this.width = 5;
         this.height = 5;
+        this.rad = 5;
         this.image = new Image();
         this.image.src = './';
         this.direction = 1; // 1: phải, -1: trái
