@@ -53,7 +53,13 @@ class BulletBoss {
         const scaleFactor = 0.3; // Tỉ lệ thu nhỏ (0.5 = nhỏ đi 50%)
         const scaledWidth = frameWidth * scaleFactor; // Tính toán chiều rộng đã thu nhỏ
         const scaledHeight = this.frameHeight * scaleFactor; // Tính toán chiều cao đã thu nhỏ
-        context.drawImage(this.image, this.currentFrame * frameWidth, 0, frameWidth, this.frameHeight, this.x, this.y, scaledWidth, scaledHeight);
+        context.drawImage(this.image, this.currentFrame * frameWidth, 0, frameWidth, this.frameHeight, this.x-20, this.y-20, scaledWidth, scaledHeight);
+
+        // context.fillStyle = 'blue'; // Màu sắc của hình tròn
+        // context.beginPath(); // Bắt đầu vẽ
+        // context.arc(this.x, this.y, 10, 0, Math.PI * 2); // Vẽ hình tròn
+        // context.fill(); // Điền màu cho hình tròn
+        // context.closePath(); // Kết thúc vẽ
     }
     shoot(){
         this.y += this.speed * Math.sin(this.direction); // Cập nhật vị trí theo hướng
