@@ -6,20 +6,24 @@ class Player {
         this.height = 5;
         this.rad = 5;
         this.image = new Image();
-        this.image.src = './';
+        this.image.src = './asset/player.png';
         this.direction = 1; // 1: phải, -1: trái
         this.speedX = 0;
         this.speedY = 0;
         this.acceleration = 0.5;
         this.hp = 100;
-        this.dps = 10;
+        this.bps = 2; //bull per sec
     }
     draw(context) {
+        context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x - 47 , this.y - 50, 100, 100);
+        
         context.fillStyle = 'red'; // Thiết lập màu đỏ
         context.beginPath();
         context.arc( this.x, this.y, 5, 0, Math.PI * 2); // Vẽ hình tròn
         context.fill();
         context.closePath();
+
     }
     movex(direction) {
         this.speedX += direction * this.acceleration;

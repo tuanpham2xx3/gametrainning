@@ -10,7 +10,7 @@ class Boss {
         this.acceleration = 0.5;
         this.directionx = 1;
         this.directiony = 1;
-        this.hp = 100000000;
+        this.hp = 100000;
         this.frameWidth = 191; // Chiều rộng của mỗi frame
         this.frameHeight = 161; // Chiều cao của mỗi frame
         this.currentFrame = 0; // Khung hình hiện tại

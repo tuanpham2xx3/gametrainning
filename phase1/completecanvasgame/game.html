@@ -32,8 +32,10 @@
     <div class="canvas-container">
         <canvas id="canvas1" width="1200" height="650"></canvas>
         <canvas id="canvas2" width="500" height="600"></canvas>
+        <button id="button" style="position: absolute; top: 500px; left: 600px;">RESTART</button>
     </div>
     <script>
+        document.getElementById('button').style.display = 'none'; // Ẩn nút
         const canvas2 = document.getElementById('canvas2');
         const context2 = canvas2.getContext('2d');
         const player = new Player();
@@ -43,13 +45,39 @@
         let lastBulletTime = 0;
         let lastBulletTime1 = 0;
         let lastBulletTime2 = 0;
-        let dps = 0; // số đạn trên giây
         let hpPlayer = player.hp;
         let hpBoss = boss.hp;
 
-        
+        let bps = player.bps; // số đạn trên giây
+        let lvboss = 10;
+        let score = 0;
+         
+        const gameManager = new GameManager(hpPlayer , hpBoss, player, boss);
+
+        function resetGame() {
+        hasLost = false; // Đặt lại cờ thua cuộc
+        hpPlayer = player.hp; // Đặt lại HP của người chơi
+        hpBoss = boss.hp; // Đặt lại HP của boss
+        bullets = []; // Đặt lại danh sách đạn
+        bulletsBoss = []; // Đặt lại danh sách đạn của boss
+        lastBulletTime = 0; // Đặt lại thời gian bắn đạn
+        lastBulletTime1 = 0; // Đặt lại thời gian bắn đạn của người chơi
+        lastBulletTime2 = 0; // Đặt lại thời gian bắn đạn của boss
+        let bps = player.bps; // số đạn trên giây
+        let lvboss = 10;
+        let score = 0;
+        document.getElementById('button').style.display = 'none'; // Ẩn nút
+        gameManager.setState('playing'); // Đặt lại trạng thái trò chơi
+        gameLoop(); // Bắt đầu lại vòng lặp trò chơi
+    }
 
 
+        function updateHUD() {
+            let base = Math.trunc((boss.hp - hpBoss) / 2000) ;
+            bps = base + 3;
+            lvboss = base + 10;
+            score = lvboss * (boss.hp - hpBoss);
+        }
         function SpawnBoss() {
             boss.draw(context2);
         }
@@ -60,9 +88,7 @@
             const image = new Image();
             image.src = imageUrl;
 
-            gameManager.draw(context);
-            //hpPlayer = gameManager.hpplayer();
-
+            gameManager.draw(context,score,bps,lvboss);
             image.onload = function() {
                 context.imageSmoothingEnabled = false;
                 context.drawImage(image, 0, 0, canvas1.width, canvas1.height); // Vẽ ảnh lên canvas
@@ -70,36 +96,36 @@
 
         }
         // Gọi hàm để vẽ ảnh lên canvas1
-        function Canvas2() {
+        function Canvas2(timestamp) {
             context2.fillStyle = 'rgba(255, 255, 255, 1)'; // Màu nền cho canvas 2 với độ trong suốt
             context2.fillRect(0, 0, canvas2.width, canvas2.height);
             player.draw(context2)
             const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
             coll.checkBulletCollision(boss);
             coll.checkBulletBoss(player);
-            //bullets = coll.getRemainingBullets();
             hpPlayer = coll.hpPlayer();
             hpBoss = coll.hpBoss();
         }     
         function gameLoop(timestamp) {
-            dps = player.dps;
+            bps = player.bps;
             handleMovement(player);
             player.update();
             boss.update();
             boss.move();
         
-
-            Canvas2();
-            if (timestamp - lastBulletTime > 1000/50) { // Kiểm tra nếu đã qua 1 giây
+            updateHUD();
+            Canvas2(timestamp);
+            if (timestamp - lastBulletTime > 1000/lvboss) { // Kiểm tra nếu đã qua 1 giây
                 const bulletboss = new BulletBoss(boss);
-                bulletsBoss.push(bulletboss); // Add new bullet to the array
+                bulletsBoss.push(bulletboss);
                 lastBulletTime = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
     }
             bulletsBoss.forEach(bullet => {
                 bullet.draw(context2); // Draw the bullet
-                bullet.shoot(); // Move the bullet
+                bullet.shoot();
+                bullet.updateFrame(timestamp); // Move the bullet
         });
-            if (timestamp - lastBulletTime1 > 1000/dps) { // Kiểm tra nếu đã qua 1 giây
+            if (timestamp - lastBulletTime1 > 1000/bps) { // Kiểm tra nếu đã qua 1 giây
                 const bullet = new BulletPlayer(player);
                 bullets.push(bullet); // Add new bullet to the array
                 lastBulletTime1 = timestamp; // Cập nhật thời gian bắn viên đạn cuối cùng
@@ -107,16 +133,27 @@
             bullets.forEach(bullet => {
                 bullet.draw(context2); // Draw the bullet
                 bullet.shoot(); // Move the bullet
+                bullet.updateFrame(timestamp);
         });
             
             boss.updateBoss(timestamp);
-            
 
+
+            if (gameManager.state === 'playing') {
+                requestAnimationFrame(gameLoop);
+            }
+            if (hpPlayer <= 0) {
+                document.getElementById('button').style.display = 'block';
+                gameManager.setState('losing');
+            } 
+            if (hpBoss <= 0) {
+                document.getElementById('button').style.display = 'block';
+                gameManager.setState('winning');
+            }
             SpawnBoss();
-            requestAnimationFrame(gameLoop);
             Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
         }
-
+        document.getElementById('button').addEventListener('click', resetGame);
         gameLoop();
     </script>
 </body>

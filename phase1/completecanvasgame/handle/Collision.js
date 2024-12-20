@@ -19,7 +19,7 @@ class Collision {
     checkBulletBoss(player) {
         this.bullBoss = this.bullBoss.filter(position => {
             const distance = Math.sqrt((position.x - player.x) ** 2 + (position.y - player.y) ** 2);
-            if (distance < (player.rad + 5)) { // Giả sử bán kính của viên đạn là 5
+            if (distance < (player.rad + 10)) { // Giả sử bán kính của viên đạn là 5
                 this.hpplayer -= 1; // Giảm HP của player
                 return false; // Xóa viên đạn khỏi danh sách
             }
