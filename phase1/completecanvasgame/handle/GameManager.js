@@ -22,7 +22,7 @@ class GameManager {
 
     }
 
-    draw(context,score,bps,lvboss) {
+    draw(context,score,bps,lvboss,tk,tkb) {
         context.fillStyle = 'red';
         context.font = '30px Arial';
         context.fillText('SCORE: ' + score, 550, 100);
@@ -30,5 +30,7 @@ class GameManager {
         context.fillText('LV BOSS: ' + lvboss, 550, 200);
         context.fillText('HP PLAYER: ' + this.hpPlayer, 550, 250);
         context.fillText('HP BOSS: ' + this.hpBoss, 550, 300);
+        context.fillText('TIME SKILL: ' + tk, 550, 350);
+        context.fillText('TIME SKILL BOSS: ' + tkb, 550, 400);
     }
 }

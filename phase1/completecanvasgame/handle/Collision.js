@@ -26,6 +26,37 @@ class Collision {
             return true; // Giữ lại viên đạn nếu không va chạm
         });
     }
+    checkSkillPlayer(boss,player) {
+        if(player.x - 70 < boss.x + 50 && player.y - 450 < boss.y + 50 && player.x - 70 + 150 > boss.x  ) {
+            this.hpboss -= 2; 
+        }
+    }
+    checkSkillBoss(player) {
+        const points = [
+            {x: 100, y: 270},
+            {x: 100, y: 470},
+            {x: 400, y: 270},
+            {x: 400, y: 470},
+            {x: 250, y: 270},
+            {x: 250, y: 420}
+        ];
+        const pointrad = 65;
+        for ( const point of points) {
+            const distance = Math.sqrt((point.x - player.x) ** 2 + (point.y - player.y) ** 2);
+            if (distance < (pointrad + player.rad)) {
+                this.hpplayer -= 0.1;
+            }
+        }
+    }
+    checkBulletCrep(bullet,crep){
+        let xc = crep.x - 35;
+        let yc = crep.y - 35;
+        const distance = Math.sqrt((bullet.x - xc) ** 2 + (bullet.y - yc) ** 2);
+        if (distance < (crep.rad + 5)) {
+            return true;
+        }
+        return false;
+    }
     hpPlayer() {
         return this.hpplayer;
     }

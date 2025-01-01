@@ -5,6 +5,8 @@ class Boss {
         this.rad = 50;
         this.image = new Image();
         this.image.src = './asset/boss.png';
+        this.imageskill = new Image();
+        this.imageskill.src = './asset/bossskill.png';
         this.speedX = 0;
         this.speedY = 0;
         this.acceleration = 0.5;
@@ -15,8 +17,10 @@ class Boss {
         this.frameHeight = 161; // Chiều cao của mỗi frame
         this.currentFrame = 0; // Khung hình hiện tại
         this.totalFrames = 12; // Tổng số khung hình
-        this.frameDelay = 200; // Thời gian giữa các khung hình (ms)
+        this.frameDelay = 100; // Thời gian giữa các khung hình (ms)
         this.lastFrameTime = 0;
+        this.lastFrameTimeSK = 0;
+        this.currentFrameSK = 0; // Khung hình hiện tại
     }
     draw(context) {
         context.drawImage(
@@ -29,6 +33,77 @@ class Boss {
             this.y - this.frameHeight / 2, // Vị trí y để vẽ
             this.frameWidth, // Chiều rộng để vẽ
             this.frameHeight // Chiều cao để vẽ
+        );
+    }
+    skill(context) {
+        // Set the rectangle's width and height
+        const widthimg = 200; // Frame width
+        const heightimg = 200; // Frame height
+        context.drawImage(
+                this.imageskill,
+                (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+                Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+                widthimg, // Chiều rộng[of frame]
+                heightimg, // Chiều cao[of frame]
+                0 , // Vị trí x[of frame]
+                350, // Vị trí y[of frame]
+                200, // Chiều rộng[of frame]
+                200 // Chiều cao[of frame]
+            );
+        context.drawImage(
+            this.imageskill,
+            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+            widthimg, // Chiều rộng[of frame]
+            heightimg, // Chiều cao[of frame]
+            150 , // Vị trí x[of frame]
+            300, // Vị trí y[of frame]
+            200, // Chiều rộng[of frame]
+            200 // Chiều cao[of frame]
+        );
+        context.drawImage(
+            this.imageskill,
+            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+            widthimg, // Chiều rộng[of frame]
+            heightimg, // Chiều cao[of frame]
+            300 , // Vị trí x[of frame]
+            350, // Vị trí y[of frame]
+            200, // Chiều rộng[of frame]
+            200 // Chiều cao[of frame]
+        );
+        context.drawImage(
+            this.imageskill,
+            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+            widthimg, // Chiều rộng[of frame]
+            heightimg, // Chiều cao[of frame]
+            0 , // Vị trí x[of frame]
+            150, // Vị trí y[of frame]
+            200, // Chiều rộng[of frame]
+            200 // Chiều cao[of frame]
+        );
+        context.drawImage(
+            this.imageskill,
+            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+            widthimg, // Chiều rộng[of frame]
+            heightimg, // Chiều cao[of frame]
+            150 , // Vị trí x[of frame]
+            100, // Vị trí y[of frame]
+            200, // Chiều rộng[of frame]
+            200 // Chiều cao[of frame]
+        );
+        context.drawImage(
+            this.imageskill,
+            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+            widthimg, // Chiều rộng[of frame]
+            heightimg, // Chiều cao[of frame]
+            300 , // Vị trí x[of frame]
+            150, // Vị trí y[of frame]
+            200, // Chiều rộng[of frame]
+            200 // Chiều cao[of frame]
         );
     }
     move() {
@@ -81,6 +156,12 @@ class Boss {
         if (currentTime - this.lastFrameTime >= this.frameDelay) {
             this.currentFrame = (this.currentFrame + 1) % this.totalFrames; // Cập nhật khung hình
             this.lastFrameTime = currentTime; // Cập nhật thời gian của khung hình hiện tại
+        }
+    }
+    updateSkillBoss(currentTime) {
+        if (currentTime - this.lastFrameTimeSK >= this.frameDelay) {
+            this.currentFrameSK = (this.currentFrameSK + 1) % 6; // Cập nhật khung hình
+            this.lastFrameTimeSK = currentTime; // Cập nhật thời gian của khung hình hiện tại
         }
     }
 }

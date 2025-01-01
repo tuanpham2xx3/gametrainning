@@ -7,6 +7,7 @@
     <script src="class/boss.js"></script>
     <script src="class/bullet.js"></script>
     <script src="class/player.js"></script>
+    <script src="class/crep.js"></script>
     <script src="handle/move.js"></script>
     <script src="handle/GameManager.js"></script>
     <script src="handle/Collision.js"></script>
@@ -25,6 +26,10 @@
             top: 20px;
             left: 20px;
         }
+        #animation {
+            top: 250px;
+            left: 20px;
+        }
 
     </style>
 </head>
@@ -32,21 +37,35 @@
     <div class="canvas-container">
         <canvas id="canvas1" width="1200" height="650"></canvas>
         <canvas id="canvas2" width="500" height="600"></canvas>
+        <canvas id="animation" width="500" height="150"></canvas>
         <button id="button" style="position: absolute; top: 500px; left: 600px;">RESTART</button>
     </div>
     <script>
+        const animation = document.getElementById('animation');
+        const context3 = animation.getContext('2d');
         document.getElementById('button').style.display = 'none'; // Ẩn nút
         const canvas2 = document.getElementById('canvas2');
         const context2 = canvas2.getContext('2d');
         const player = new Player();
         const boss = new Boss();
+        const crep = new Crep();
+
         let bullets = [];
         let bulletsBoss = [];
+        let creps = [];
+        let crepCoordinates = [];
         let lastBulletTime = 0;
         let lastBulletTime1 = 0;
         let lastBulletTime2 = 0;
         let hpPlayer = player.hp;
         let hpBoss = boss.hp;
+        let timeSkill = 10000;
+        let countskill = 0;
+        let timeSkillBoss = 0;
+        let countskillBoss = 0;
+        let onskill = false;
+        let onboss = false;
+        let numCrep = 10;
 
         let bps = player.bps; // số đạn trên giây
         let lvboss = 10;
@@ -60,12 +79,18 @@
         hpBoss = boss.hp; // Đặt lại HP của boss
         bullets = []; // Đặt lại danh sách đạn
         bulletsBoss = []; // Đặt lại danh sách đạn của boss
+        creps = [];
         lastBulletTime = 0; // Đặt lại thời gian bắn đạn
         lastBulletTime1 = 0; // Đặt lại thời gian bắn đạn của người chơi
         lastBulletTime2 = 0; // Đặt lại thời gian bắn đạn của boss
         let bps = player.bps; // số đạn trên giây
         let lvboss = 10;
         let score = 0;
+        let timeSkill = 0;
+        let countskill = 0;
+        let onskill = false;
+        let timeSkillBoss = 0;
+        let countskillBoss = 0;
         document.getElementById('button').style.display = 'none'; // Ẩn nút
         gameManager.setState('playing'); // Đặt lại trạng thái trò chơi
         gameLoop(); // Bắt đầu lại vòng lặp trò chơi
@@ -80,6 +105,80 @@
         }
         function SpawnBoss() {
             boss.draw(context2);
+            onboss = true;
+
+        }
+        function Animations() {
+            const animationRect = animation.getBoundingClientRect();
+            const gifImage = document.createElement('img');
+            //context3.globalAlpha = 0.5;
+            gifImage.id = 'skillAnimation';
+            gifImage.src = './asset/skillV.gif';
+            gifImage.style.position = 'absolute';
+            gifImage.style.left = animation.offsetLeft + 'px';
+            gifImage.style.top = animation.offsetTop + 'px';
+            gifImage.style.width = animation.width + 'px';
+            gifImage.style.height = animation.height + 'px';
+            gifImage.style.opacity = 0.8;
+            gifImage.style.pointerEvents = 'none'; // Prevent the image from intercepting mouse events
+            
+            document.body.appendChild(gifImage);
+            setTimeout(() => {
+                if (gifImage && gifImage.parentNode) {
+                    gifImage.remove();
+                }
+            }, 0);
+        }
+        function UltimateAnimations() {
+            if (!window.animationStartTime) {
+                window.animationStartTime = Date.now();
+            }
+            if (Date.now() - window.animationStartTime <= 3550) {
+                Animations();
+            }
+        }
+        function SkillBoss() {
+            const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
+            let count = Math.floor((boss.hp - hpBoss) / 1000);
+            if ( count > countskillBoss) {
+                timeSkillBoss = 1000;
+                countskillBoss = count;
+            }
+
+            if(timeSkillBoss > 0) {
+                boss.skill(context2);
+                timeSkillBoss--;
+                coll.checkSkillBoss(player);
+                hpPlayer = coll.hpPlayer();
+            }
+        }
+        function Skill()  {
+            const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
+            let count = Math.floor(score / 1000);
+            if (count > countskill && !onskill) {
+                if(timeSkill <10000) {
+                    timeSkill += 1000;
+                }
+                countskill = count;
+            }
+            if(timeSkill == 10000 && keys[' ']) {
+                onskill = true;
+            }
+            if(timeSkill > 0 && onskill) {
+                //boss.skill(context2,timeSkill);
+                player.skill(context2);
+                timeSkill--;
+                setTimeout(Skill, 1000);
+                if (onboss){
+                    coll.checkSkillPlayer(boss,player);
+                    hpBoss = coll.hpBoss();
+                }
+
+
+            }
+            if(timeSkill == 0) {
+                onskill = false;
+            }
         }
         function Canvas1(canvasId, imageUrl) {
             const canvas1 = document.getElementById(canvasId);
@@ -88,33 +187,22 @@
             const image = new Image();
             image.src = imageUrl;
 
-            gameManager.draw(context,score,bps,lvboss);
+            gameManager.draw(context,score,bps,lvboss,timeSkill,timeSkillBoss);
             image.onload = function() {
                 context.imageSmoothingEnabled = false;
                 context.drawImage(image, 0, 0, canvas1.width, canvas1.height); // Vẽ ảnh lên canvas
             };
 
         }
-        // Gọi hàm để vẽ ảnh lên canvas1
-        function Canvas2(timestamp) {
-            context2.fillStyle = 'rgba(255, 255, 255, 1)'; // Màu nền cho canvas 2 với độ trong suốt
-            context2.fillRect(0, 0, canvas2.width, canvas2.height);
-            player.draw(context2)
+        function roundBoss(timestamp) {
+            boss.update();
+            boss.move();
             const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
             coll.checkBulletCollision(boss);
             coll.checkBulletBoss(player);
             hpPlayer = coll.hpPlayer();
             hpBoss = coll.hpBoss();
-        }     
-        function gameLoop(timestamp) {
-            bps = player.bps;
-            handleMovement(player);
-            player.update();
-            boss.update();
-            boss.move();
-        
-            updateHUD();
-            Canvas2(timestamp);
+            SkillBoss();
             if (timestamp - lastBulletTime > 1000/lvboss) { // Kiểm tra nếu đã qua 1 giây
                 const bulletboss = new BulletBoss(boss);
                 bulletsBoss.push(bulletboss);
@@ -125,6 +213,93 @@
                 bullet.shoot();
                 bullet.updateFrame(timestamp); // Move the bullet
         });
+            SpawnBoss();
+        }
+        function round1(timestamp) {
+            crepCoordinates = [
+                {x: 100, y: 100},
+                {x: 200, y: 200},
+                {x: 300, y: 100},
+                {x: 400, y: 200},
+                {x: 500, y: 100},
+                {x: 300, y: 300}
+            ];
+            spawCrep(timestamp,crepCoordinates);
+        }
+        function round2(timestamp) {
+            crepCoordinates = [
+                {x: 300, y: 100},
+                {x: 500, y: 300},
+                {x: 400, y: 200},
+                {x: 300, y: 300},
+                {x: 200, y: 200},
+                {x: 100, y: 300}
+            ];
+            spawCrep(timestamp,crepCoordinates);
+        }
+        function round3(timestamp) {
+            crepCoordinates = [
+                {x: 100, y: 100},
+                {x: 200, y: 200},
+                {x: 300, y: 100},
+                {x: 400, y: 200},
+                {x: 500, y: 100},
+                {x: 300, y: 300}
+            ];
+            spawCrep(timestamp,crepCoordinates);
+        }
+        function spawCrep(timestamp,crepCoordinates) {
+            const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
+            for (let i = 0; i < numCrep; i++) {
+                const crep = new Crep();
+                creps.push(crep);
+                numCrep--;
+            }
+            creps.forEach((crep,index) => {
+                const position = crepCoordinates[index % crepCoordinates.length];
+                crep.move(position.x, position.y, context2);
+                crep.updateCrep();
+                crep.updateCrepFrame(timestamp);
+            });
+            creps.forEach(crep => {
+                bullets = bullets.filter(bullet => {
+                    if (coll.checkBulletCrep(bullet, crep)) {
+                        creps = creps.filter(c => c !== crep); // Remove the crep if hit
+                        return false; // Remove the bullet
+                    }
+                    return true; // Keep the bullet if no collision
+                });
+            });
+        }
+        function stateGame() {
+            if (gameManager.state === 'playing') {
+                requestAnimationFrame(gameLoop);
+            }
+            if (hpPlayer <= 0) {
+                document.getElementById('button').style.display = 'block';
+                gameManager.setState('losing');
+            } 
+            if (hpBoss <= 0) {
+                document.getElementById('button').style.display = 'block';
+                gameManager.setState('winning');
+            }
+            if(onskill) {
+                UltimateAnimations();
+            }
+        }
+        // Gọi hàm để vẽ ảnh lên canvas1
+        function Canvas2(timestamp) {
+            context2.fillStyle = 'rgba(255, 255, 255, 1)'; // Màu nền cho canvas 2 với độ trong suốt
+            context2.fillRect(0, 0, canvas2.width, canvas2.height);
+            player.draw(context2)
+            //roundBoss(timestamp);
+        }     
+        function gameLoop(timestamp) {
+            bps = player.bps;
+            handleMovement(player);
+            player.update();
+            updateHUD();
+            Canvas2(timestamp);
             if (timestamp - lastBulletTime1 > 1000/bps) { // Kiểm tra nếu đã qua 1 giây
                 const bullet = new BulletPlayer(player);
                 bullets.push(bullet); // Add new bullet to the array
@@ -137,20 +312,11 @@
         });
             
             boss.updateBoss(timestamp);
-
-
-            if (gameManager.state === 'playing') {
-                requestAnimationFrame(gameLoop);
-            }
-            if (hpPlayer <= 0) {
-                document.getElementById('button').style.display = 'block';
-                gameManager.setState('losing');
-            } 
-            if (hpBoss <= 0) {
-                document.getElementById('button').style.display = 'block';
-                gameManager.setState('winning');
-            }
-            SpawnBoss();
+            boss.updateSkillBoss(timestamp);
+            player.updatePlayer(timestamp);
+            stateGame();
+            round1(timestamp);
+            Skill();
             Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
         }
         document.getElementById('button').addEventListener('click', resetGame);

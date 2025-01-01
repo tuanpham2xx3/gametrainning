@@ -15,6 +15,11 @@ class BulletPlayer {
 
     }
     draw(context) {
+        // context.beginPath();
+        // context.arc(this.x, this.y, this.rad, 0, Math.PI * 2);
+        // context.fillStyle = 'red';
+        // context.fill();
+        // context.closePath();
         const frameWidth = this.frameWidth / this.totalFrames; // Calculate width of each frame
         const scaleFactor = 0.1; // Tỉ lệ thu nhỏ (0.5 = nhỏ đi 50%)
         const scaledWidth = frameWidth * scaleFactor; // Tính toán chiều rộng đã thu nhỏ
@@ -72,5 +77,5 @@ class BulletBoss {
         }
     }
 
- 
+
 }
