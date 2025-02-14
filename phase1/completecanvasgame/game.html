@@ -8,9 +8,12 @@
     <script src="class/bullet.js"></script>
     <script src="class/player.js"></script>
     <script src="class/crep.js"></script>
+    <script src="class/animation1.js"></script>
+    <script src="class/level.js"></script>
     <script src="handle/move.js"></script>
     <script src="handle/GameManager.js"></script>
     <script src="handle/Collision.js"></script>
+
     <style>
         .canvas-container {
             position: relative;
@@ -29,6 +32,12 @@
         #animation {
             top: 250px;
             left: 20px;
+        }
+        @font-face {
+            font-family: 'BlackJack';
+            src: url('./asset/fonts/BLACKJAR.TTF');
+            font-weight: normal;
+            font-style: normal;
         }
 
     </style>
@@ -49,6 +58,9 @@
         const player = new Player();
         const boss = new Boss();
         const crep = new Crep();
+        const anima = new Animation1();
+        const levelManager = new LevelManager();
+        let LevelGame = levelManager.currentLevel;
 
         let bullets = [];
         let bulletsBoss = [];
@@ -65,7 +77,10 @@
         let countskillBoss = 0;
         let onskill = false;
         let onboss = false;
-        let numCrep = 10;
+        let numCrep = 0;
+        //let round = 1;
+        let level = 1;
+        let stillRound = true;
 
         let bps = player.bps; // số đạn trên giây
         let lvboss = 10;
@@ -187,7 +202,7 @@
             const image = new Image();
             image.src = imageUrl;
 
-            gameManager.draw(context,score,bps,lvboss,timeSkill,timeSkillBoss);
+            gameManager.draw(context,level,score,bps,lvboss,timeSkill,timeSkillBoss);
             image.onload = function() {
                 context.imageSmoothingEnabled = false;
                 context.drawImage(image, 0, 0, canvas1.width, canvas1.height); // Vẽ ảnh lên canvas
@@ -198,8 +213,12 @@
             boss.update();
             boss.move();
             const coll = new Collision(bullets, bulletsBoss, hpPlayer, hpBoss);
-            coll.checkBulletCollision(boss);
-            coll.checkBulletBoss(player);
+            if(coll.checkBulletCollision(boss)) {
+                anima.gethit(boss,context2);
+            };
+            if(coll.checkBulletBoss(player)) {
+                anima.gethit(player,context2);
+            }
             hpPlayer = coll.hpPlayer();
             hpBoss = coll.hpBoss();
             SkillBoss();
@@ -216,14 +235,6 @@
             SpawnBoss();
         }
         function round1(timestamp) {
-            crepCoordinates = [
-                {x: 100, y: 100},
-                {x: 200, y: 200},
-                {x: 300, y: 100},
-                {x: 400, y: 200},
-                {x: 500, y: 100},
-                {x: 300, y: 300}
-            ];
             spawCrep(timestamp,crepCoordinates);
         }
         function round2(timestamp) {
@@ -264,11 +275,19 @@
             creps.forEach(crep => {
                 bullets = bullets.filter(bullet => {
                     if (coll.checkBulletCrep(bullet, crep)) {
+                        anima.defeatStartTime = performance.now();
+                        anima.currentFramedf = 0;
+                        anima.defeat(crep,context2);
+                        console.log("crep trước khi lọc:", creps.length);
                         creps = creps.filter(c => c !== crep); // Remove the crep if hit
+                        console.log("crep sau khi lọc:", creps);
                         return false; // Remove the bullet
                     }
                     return true; // Keep the bullet if no collision
                 });
+            if (creps.length === 0) {
+                        stillRound = false;
+            }
             });
         }
         function stateGame() {
@@ -314,11 +333,70 @@
             boss.updateBoss(timestamp);
             boss.updateSkillBoss(timestamp);
             player.updatePlayer(timestamp);
+            anima.updateDefeat(timestamp);
             stateGame();
-            round1(timestamp);
             Skill();
+            //round1(timestamp);
+            if(level === 4){
+                roundBoss(timestamp);
+            }
+            spawCrep(timestamp,crepCoordinates);
+            console.log("stillRound:", stillRound);
+
+
+            if(!stillRound) {
+                levelManager.currentLevel.onWon();
+                stillRound = true;
+                level++;
+        }
             Canvas1('canvas1', './asset/background_game1.jpg'); // Thay đổi đường dẫn đến ảnh của bạn
         }
+
+        (async function() {
+        await levelManager.loadLevel(1);
+        let LevelGame = levelManager.currentLevel;
+        crepCoordinates = LevelGame.enemies;
+        numCrep = crepCoordinates.length;
+        console.log("Danh sách crepCoordinates:", crepCoordinates);
+        console.log("Số lượng crep:", numCrep);
+        levelManager.currentLevel.onWon = async () => {
+                await levelManager.loadLevel(2);
+                LevelGame = levelManager.currentLevel;
+                crepCoordinates = LevelGame.enemies;
+                numCrep = crepCoordinates.length;
+                console.log("Danh sách crepCoordinates:", crepCoordinates);
+                console.log("Số lượng crep:", numCrep);
+
+                levelManager.currentLevel.onWon = async () => {
+                await levelManager.loadLevel(3);
+                LevelGame = levelManager.currentLevel;
+                crepCoordinates = LevelGame.enemies;
+                numCrep = crepCoordinates.length;
+                console.log("Danh sách crepCoordinates:", crepCoordinates);
+                console.log("Số lượng crep:", numCrep);
+            };
+            };
+        // isDone = true;
+        // while(isDone) {
+        // if(level == 3) {
+        // await levelManager.loadLevel(3);
+        // LevelGame = levelManager.currentLevel;
+        // crepCoordinates = LevelGame.enemies;
+        // numCrep = crepCoordinates.length;
+        // console.log("Danh sách crepCoordinates:", crepCoordinates);
+        // console.log("Số lượng crep:", numCrep);
+        // isDone = false;
+        // };
+    //};
+
+
+        })();
+        
+
+
+
+
+
         document.getElementById('button').addEventListener('click', resetGame);
         gameLoop();
     </script>

@@ -21,16 +21,16 @@ class GameManager {
         document.getElementById('button').style.display = 'none'; // Ẩn nút khi khởi động lại
 
     }
-
-    draw(context,score,bps,lvboss,tk,tkb) {
-        context.fillStyle = 'red';
-        context.font = '30px Arial';
-        context.fillText('SCORE: ' + score, 550, 100);
-        context.fillText('POWER: ' + bps, 550, 150);
-        context.fillText('LV BOSS: ' + lvboss, 550, 200);
-        context.fillText('HP PLAYER: ' + this.hpPlayer, 550, 250);
-        context.fillText('HP BOSS: ' + this.hpBoss, 550, 300);
-        context.fillText('TIME SKILL: ' + tk, 550, 350);
-        context.fillText('TIME SKILL BOSS: ' + tkb, 550, 400);
+    draw(context,level,score,bps,lvboss,tk,tkb) {
+        context.fillStyle = 'white';
+        context.font = '30px BlackJack';
+        context.fillText('LV          : ' + level, 550, 50);
+        context.fillText('SCORE   : ' + score, 550, 100);
+        context.fillText('POWER  : ' + bps, 550, 150);
+        //context.fillText('LV BOSS: ' + lvboss, 550, 200);
+        context.fillText('HP         : ' + this.hpPlayer, 550, 200);
+        //context.fillText('HP BOSS: ' + this.hpBoss, 550, 300);
+        context.fillText('ENERGY: ' + tk, 550, 250);
+        //context.fillText('TIME SKILL BOSS: ' + tkb, 550, 400);
     }
 }
