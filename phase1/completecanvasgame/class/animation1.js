@@ -15,23 +15,64 @@ class Animation1{
         this.defeatDuration = 2000; // 2 seconds in milliseconds
     }
     gethit(object,context) {
+        context.globalCompositeOperation = 'source-over';
         context.drawImage(
             this.imghit,
-            object.x - 10, object.y - 10,      // Destination X, Y
-            65, 65   // Destination width, height
+            object.x - 125, object.y - 125,      // Destination X, Y
+            250, 250   // Destination width, height
         );
+        context.globalCompositeOperation = 'source-over';
         this.imghit.onload = () => {
             console.log('Hit image loaded successfully');
             console.log('Image dimensions:', this.imghit.width, 'x', this.imghit.height);
         };
         this.imghit.onerror = () => {
             console.error('Error loading hit image');
+        }
     }
-}
+    defeat2(x,y,context) {
+        // Initialize start time if this is the first frame
+        if (this.currentFramedf === 0) {
+            this.defeatStartTime = performance.now();
+        }
+        if(this.defeatStartTime) {
+            const currentTime = performance.now();
+            const elapsedTime = currentTime - this.defeatStartTime;
+            if(elapsedTime >= 3000) {
+                this.defeatStartTime = null;
+                return;
+            }
+        }
+        
+        const frameWidth = this.imgdefeat.width / 4;  // 4 columns
+        const frameHeight = this.imgdefeat.height / 2; // 2 rows
+        const column = this.currentFramedf % 4;  // Get current column (0-3)
+        const row = Math.floor(this.currentFramedf / 4); // Get current row (0-1)
+        
+        // Source coordinates in sprite sheet
+        const sourceX = column * frameWidth;
+        const sourceY = row * frameHeight;
+        // Draw the current frame
+        context.drawImage(
+            this.imgdefeat,
+            sourceX, sourceY,           // Source X, Y
+            frameWidth, frameHeight,    // Source width, height
+            x, y,         // Destination X, Y
+            100, 100      // Destination width, height
+        );
+    }
     defeat(object,context) {
         // Initialize start time if this is the first frame
         if (this.currentFramedf === 0) {
             this.defeatStartTime = performance.now();
+        }
+        if(this.defeatStartTime) {
+            const currentTime = performance.now();
+            const elapsedTime = currentTime - this.defeatStartTime;
+            if(elapsedTime >= 3000) {
+                this.defeatStartTime = null;
+                return;
+            }
         }
         
         const frameWidth = this.imgdefeat.width / 4;  // 4 columns
@@ -48,7 +89,7 @@ class Animation1{
             sourceX, sourceY,           // Source X, Y
             frameWidth, frameHeight,    // Source width, height
             object.x, object.y,         // Destination X, Y
-            object.rad, object.rad      // Destination width, height
+            100, 100      // Destination width, height
         );
     }
     updateDefeat(currentTime) {

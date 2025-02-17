@@ -17,13 +17,14 @@ class Crep {
         this.totalFrames = 12; // Tổng số khung hình
         this.frameDelay = 200; // Thời gian giữa các khung hình (ms)
         this.lastFrameTime = 0;
+        this.movingRight = true;
     }
     draw(context,n){
         context.beginPath();
-        context.arc(this.x - 35, this.y - 35, this.rad, 0, Math.PI * 2);
-        context.fillStyle = 'green';
-        context.fill();
-        context.closePath();
+        // context.arc(this.x - 35, this.y - 35, this.rad, 0, Math.PI * 2);
+        // context.fillStyle = 'green';
+        // context.fill();
+        // context.closePath();
         context.drawImage(
             this.image,
             (this.currentFrame % 3) * this.frameWidth, // Vị trí x của frame (3 khung hình trên mỗi hàng)

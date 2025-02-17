@@ -21,16 +21,26 @@ class GameManager {
         document.getElementById('button').style.display = 'none'; // Ẩn nút khi khởi động lại
 
     }
-    draw(context,level,score,bps,lvboss,tk,tkb) {
-        context.fillStyle = 'white';
+    draw(context,level,score,bps,lvboss,tk,tkb,boss) {
+        context.fillStyle = 'red';
         context.font = '30px BlackJack';
-        context.fillText('LV          : ' + level, 550, 50);
-        context.fillText('SCORE   : ' + score, 550, 100);
-        context.fillText('POWER  : ' + bps, 550, 150);
+        context.fillText('LV    : ' + level, 50, 460);
+        context.fillText('SCORE   : ' + score, 50, 500);
+        context.fillText('POWER  : ' + bps, 50, 540);
         //context.fillText('LV BOSS: ' + lvboss, 550, 200);
-        context.fillText('HP         : ' + this.hpPlayer, 550, 200);
-        //context.fillText('HP BOSS: ' + this.hpBoss, 550, 300);
-        context.fillText('ENERGY: ' + tk, 550, 250);
+        context.fillStyle = 'white';
+        context.fillText(parseInt(this.hpPlayer), 250, 615);
+        if(level == 4) {
+            context.font = '20px BlackJack';
+            context.fillText( + this.hpBoss, boss.x - 15, boss.y -85);
+        }
+        context.fillStyle = 'blue';
+        //context.fillText('ENERGY: ' + tk, 550, 250);
         //context.fillText('TIME SKILL BOSS: ' + tkb, 550, 400);
+        if(tk == 10000) {
+            context.font = '20px BlackJack';
+            context.fillStyle = 'white'; 
+            context.fillText('PRESS SPACE FOR USE SKILL', 150, 650);
+        }
     }
 }

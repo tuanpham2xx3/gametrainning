@@ -12,7 +12,7 @@ class Boss {
         this.acceleration = 0.5;
         this.directionx = 1;
         this.directiony = 1;
-        this.hp = 100000;
+        this.hp = 10000;
         this.frameWidth = 191; // Chiều rộng của mỗi frame
         this.frameHeight = 161; // Chiều cao của mỗi frame
         this.currentFrame = 0; // Khung hình hiện tại
@@ -109,7 +109,7 @@ class Boss {
     move() {
         let step = 1;
         // Di chuyển qua phải
-        if (this.x < 420 && this.directionx === 1) {
+        if (this.x < 1000 && this.directionx === 1) {
             this.speedX += step * this.acceleration;
             this.x += this.speedX;
         }
@@ -125,28 +125,28 @@ class Boss {
             this.y += this.speedY;
         }
         // Di chuyển qua trái
-        if (this.y > 0 && this.directiony === -1) {
+        if (this.y > 100 && this.directiony === -1) {
             this.speedY += -1 * step * this.acceleration;
             this.y += this.speedY;
         }
 
-        if (this.y >= 120) {
+        if (this.y >= 200) {
             this.directiony = -1; // Đổi hướng sang trái
         } else if (this.y <= 40) {
             this.directiony = 1; // Đổi hướng sang phải
         }
 
         // Đảo hướng khi chạm vào biên
-        if (this.x >= 380) {
+        if (this.x >= 1000) {
             this.directionx = -1; // Đổi hướng sang trái
-        } else if (this.x <= 40) {
+        } else if (this.x <= 400) {
             this.directionx = 1; // Đổi hướng sang phải
         }
     }
     movey(direction) {
         this.speedY += direction * this.acceleration;
         this.y += this.speedY;
-        this.y = Math.max(this.height, Math.min(this.y, 600 - this.height)); // Giới hạn y
+        this.y = Math.max(this.height, Math.min(this.y, 1000 - this.height)); // Giới hạn y
     }
     update() {
         this.speedX *= 0.1;

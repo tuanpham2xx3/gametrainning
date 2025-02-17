@@ -67,12 +67,12 @@ class Player {
     movex(direction) {
         this.speedX += direction * this.acceleration;
         this.x += this.speedX;
-        this.x = Math.max(this.width, Math.min(this.x, 500 - this.width)); // Giới hạn x
+        //this.x = Math.max(this.width, Math.min(this.x, 500 - this.width)); // Giới hạn x
     }
     movey(direction) {
         this.speedY += direction * this.acceleration;
         this.y += this.speedY;
-        this.y = Math.max(this.height, Math.min(this.y, 600 - this.height)); // Giới hạn y
+        //this.y = Math.max(this.height, Math.min(this.y, 600 - this.height)); // Giới hạn y
     }
     update() {
         this.speedX *= 0.1;
