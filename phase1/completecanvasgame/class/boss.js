@@ -35,109 +35,133 @@ class Boss {
             this.frameHeight // Chiều cao để vẽ
         );
     }
-    skill(context) {
-        // Set the rectangle's width and height
+    genSkillBoss(context){
         const widthimg = 200; // Frame width
         const heightimg = 200; // Frame height
-        context.drawImage(
+        let position = [
+            {x : 200 , y : 200},
+            {x : 400 , y : 400},
+            {x : 600 , y : 200},
+            {x : 800 , y : 400},
+            {x : 1000 , y : 200},
+            {x : 1200 , y : 400}
+        ];
+        for (let i = 0 ; i < 6 ; i++) {
+            context.drawImage(
                 this.imageskill,
-                (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-                Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-                widthimg, // Chiều rộng[of frame]
-                heightimg, // Chiều cao[of frame]
-                0 , // Vị trí x[of frame]
-                350, // Vị trí y[of frame]
-                200, // Chiều rộng[of frame]
-                200 // Chiều cao[of frame]
+                (this.currentFrameSK % 2) * widthimg,
+                Math.floor(this.currentFrameSK / 3) * heightimg,
+                widthimg,
+                heightimg,
+                position[i].x,
+                position[i].y,
+                widthimg,
+                heightimg
             );
-        context.drawImage(
-            this.imageskill,
-            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-            widthimg, // Chiều rộng[of frame]
-            heightimg, // Chiều cao[of frame]
-            150 , // Vị trí x[of frame]
-            300, // Vị trí y[of frame]
-            200, // Chiều rộng[of frame]
-            200 // Chiều cao[of frame]
-        );
-        context.drawImage(
-            this.imageskill,
-            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-            widthimg, // Chiều rộng[of frame]
-            heightimg, // Chiều cao[of frame]
-            300 , // Vị trí x[of frame]
-            350, // Vị trí y[of frame]
-            200, // Chiều rộng[of frame]
-            200 // Chiều cao[of frame]
-        );
-        context.drawImage(
-            this.imageskill,
-            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-            widthimg, // Chiều rộng[of frame]
-            heightimg, // Chiều cao[of frame]
-            0 , // Vị trí x[of frame]
-            150, // Vị trí y[of frame]
-            200, // Chiều rộng[of frame]
-            200 // Chiều cao[of frame]
-        );
-        context.drawImage(
-            this.imageskill,
-            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-            widthimg, // Chiều rộng[of frame]
-            heightimg, // Chiều cao[of frame]
-            150 , // Vị trí x[of frame]
-            100, // Vị trí y[of frame]
-            200, // Chiều rộng[of frame]
-            200 // Chiều cao[of frame]
-        );
-        context.drawImage(
-            this.imageskill,
-            (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
-            Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
-            widthimg, // Chiều rộng[of frame]
-            heightimg, // Chiều cao[of frame]
-            300 , // Vị trí x[of frame]
-            150, // Vị trí y[of frame]
-            200, // Chiều rộng[of frame]
-            200 // Chiều cao[of frame]
-        );
+        }
+
     }
+    // skill(context) {
+    //     const widthimg = 200; // Frame width
+    //     const heightimg = 200; // Frame height
+    //     context.drawImage(
+    //             this.imageskill,
+    //             (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //             Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //             widthimg, // Chiều rộng[of frame]
+    //             heightimg, // Chiều cao[of frame]
+    //             0 , // Vị trí x[of frame]
+    //             350, // Vị trí y[of frame]
+    //             200, // Chiều rộng[of frame]
+    //             200 // Chiều cao[of frame]
+    //         );
+    //     context.drawImage(
+    //         this.imageskill,
+    //         (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //         Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //         widthimg, // Chiều rộng[of frame]
+    //         heightimg, // Chiều cao[of frame]
+    //         150 , // Vị trí x[of frame]
+    //         300, // Vị trí y[of frame]
+    //         200, // Chiều rộng[of frame]
+    //         200 // Chiều cao[of frame]
+    //     );
+    //     context.drawImage(
+    //         this.imageskill,
+    //         (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //         Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //         widthimg, // Chiều rộng[of frame]
+    //         heightimg, // Chiều cao[of frame]
+    //         300 , // Vị trí x[of frame]
+    //         350, // Vị trí y[of frame]
+    //         200, // Chiều rộng[of frame]
+    //         200 // Chiều cao[of frame]
+    //     );
+    //     context.drawImage(
+    //         this.imageskill,
+    //         (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //         Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //         widthimg, // Chiều rộng[of frame]
+    //         heightimg, // Chiều cao[of frame]
+    //         0 , // Vị trí x[of frame]
+    //         150, // Vị trí y[of frame]
+    //         200, // Chiều rộng[of frame]
+    //         200 // Chiều cao[of frame]
+    //     );
+    //     context.drawImage(
+    //         this.imageskill,
+    //         (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //         Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //         widthimg, // Chiều rộng[of frame]
+    //         heightimg, // Chiều cao[of frame]
+    //         150 , // Vị trí x[of frame]
+    //         100, // Vị trí y[of frame]
+    //         200, // Chiều rộng[of frame]
+    //         200 // Chiều cao[of frame]
+    //     );
+    //     context.drawImage(
+    //         this.imageskill,
+    //         (this.currentFrameSK % 2) * widthimg, // Vị trí x[of frame]
+    //         Math.floor(this.currentFrameSK / 3) * heightimg, // Vị trí y[of frame]
+    //         widthimg, // Chiều rộng[of frame]
+    //         heightimg, // Chiều cao[of frame]
+    //         300 , // Vị trí x[of frame]
+    //         150, // Vị trí y[of frame]
+    //         200, // Chiều rộng[of frame]
+    //         200 // Chiều cao[of frame]
+    //     );
+    // }
     move() {
         let step = 1;
         // Di chuyển qua phải
-        if (this.x < 1000 && this.directionx === 1) {
+        if (this.x < 1200 && this.directionx === 1) {
             this.speedX += step * this.acceleration;
             this.x += this.speedX;
         }
         // Di chuyển qua trái
-        if (this.x > 0 && this.directionx === -1) {
+        if (this.x > 400 && this.directionx === -1) {
             this.speedX += -1 * step * this.acceleration;
             this.x += this.speedX;
         }
 
-
-        if (this.y < 120 && this.directiony === 1) {
+        if (this.y < 300 && this.directiony === 1) {
             this.speedY += step * this.acceleration;
             this.y += this.speedY;
         }
         // Di chuyển qua trái
-        if (this.y > 100 && this.directiony === -1) {
+        if (this.y > 150 && this.directiony === -1) {
             this.speedY += -1 * step * this.acceleration;
             this.y += this.speedY;
         }
 
-        if (this.y >= 200) {
+        if (this.y >= 300) {
             this.directiony = -1; // Đổi hướng sang trái
-        } else if (this.y <= 40) {
+        } else if (this.y <= 150) {
             this.directiony = 1; // Đổi hướng sang phải
         }
 
         // Đảo hướng khi chạm vào biên
-        if (this.x >= 1000) {
+        if (this.x >= 1200) {
             this.directionx = -1; // Đổi hướng sang trái
         } else if (this.x <= 400) {
             this.directionx = 1; // Đổi hướng sang phải

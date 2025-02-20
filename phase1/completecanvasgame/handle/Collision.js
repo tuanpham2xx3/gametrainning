@@ -49,12 +49,12 @@ class Collision {
     }
     checkSkillBoss(player) {
         const points = [
-            {x: 100, y: 270},
-            {x: 100, y: 470},
-            {x: 400, y: 270},
-            {x: 400, y: 470},
-            {x: 250, y: 270},
-            {x: 250, y: 420}
+            {x: 300, y: 320},
+            {x: 500, y: 520},
+            {x: 700, y: 320},
+            {x: 900, y: 520},
+            {x: 1100, y: 320},
+            {x: 1300, y: 520}
         ];
         const pointrad = 65;
         for ( const point of points) {

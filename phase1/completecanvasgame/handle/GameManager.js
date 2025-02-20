@@ -24,9 +24,10 @@ class GameManager {
     draw(context,level,score,bps,lvboss,tk,tkb,boss) {
         context.fillStyle = 'red';
         context.font = '30px BlackJack';
-        context.fillText('LV    : ' + level, 50, 460);
-        context.fillText('SCORE   : ' + score, 50, 500);
-        context.fillText('POWER  : ' + bps, 50, 540);
+        context.fillText('LV    : ' + level, 50, 420);
+        context.fillText('SCORE   : ' + score, 50, 460);
+        context.fillText('POWER  : ' + bps, 50, 500);
+        context.fillText('PRESS  Z  FOR  PAUSE', 50, 540);
         //context.fillText('LV BOSS: ' + lvboss, 550, 200);
         context.fillStyle = 'white';
         context.fillText(parseInt(this.hpPlayer), 250, 615);
@@ -34,7 +35,7 @@ class GameManager {
             context.font = '20px BlackJack';
             context.fillText( + this.hpBoss, boss.x - 15, boss.y -85);
         }
-        context.fillStyle = 'blue';
+        //context.fillStyle = 'blue';
         //context.fillText('ENERGY: ' + tk, 550, 250);
         //context.fillText('TIME SKILL BOSS: ' + tkb, 550, 400);
         if(tk == 10000) {
@@ -42,5 +43,6 @@ class GameManager {
             context.fillStyle = 'white'; 
             context.fillText('PRESS SPACE FOR USE SKILL', 150, 650);
         }
+
     }
 }
